@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/API/">
+    <Project Path="src/API/TrafficFineManagement.API/TrafficFineManagement.API.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/TrafficFineManagement.Application/TrafficFineManagement.Application.csproj" />
+    <Project Path="src/BuildingBlocks/TrafficFineManagement.Domain/TrafficFineManagement.Domain.csproj" />
+    <Project Path="src/BuildingBlocks/TrafficFineManagement.Infrastructure/TrafficFineManagement.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Vehicles/">
+    <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Application/TrafficFineManagement.Vehicles.Application.csproj" />
+    <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Domain/TrafficFineManagement.Vehicles.Domain.csproj" />
+    <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Infrastructure/TrafficFineManagement.Vehicles.Infrastructure.csproj" />
+    <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.IntegrationEvents/TrafficFineManagement.Vehicles.IntegrationEvents.csproj" />
+  </Folder>
+</Solution>
