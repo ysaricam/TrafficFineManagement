@@ -1,3 +1,4 @@
+using MediatR;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles;
 
@@ -5,23 +6,31 @@ namespace TrafficFineManagement.Modules.Vehicles.Infrastructure;
 
 public sealed class VehiclesModule : IVehiclesModule
 {
-    public Task<IReadOnlyCollection<VehiclesSummaryDto>>GetVehiclesSummariesAsync(
+    private readonly IMediator _mediator;
+
+    public VehiclesModule(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public Task<TResult> ExecuteCommandAsync<TResult>(
+        ICommand<TResult> command,
         CancellationToken cancellationToken = default)
     {
-        IReadOnlyCollection<VehiclesSummaryDto> vehicles =
-        [
-            new VehiclesSummaryDto(
-                Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                "34 YSN 34",
-                "Ford",
-                "Focus"),
-            new VehiclesSummaryDto(
-                Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                "41 YS 41",
-                "Kia",
-                "Sportage")
-        ];
-        
-        return Task.FromResult(vehicles);
+        return _mediator.Send(command, cancellationToken);
+    }
+
+    public Task ExecuteCommandAsync(
+        ICommand command,
+        CancellationToken cancellationToken = default)
+    {
+        return _mediator.Send(command, cancellationToken);
+    }
+
+    public Task<TResult> ExecuteQueryAsync<TResult>(
+        IQuery<TResult> query,
+        CancellationToken cancellationToken = default)
+    {
+        return _mediator.Send(query, cancellationToken);
     }
 }

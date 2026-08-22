@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles;
+using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
+using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.CompleteVehicleUsage;
+using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
+using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetVehicle;
+using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.Vehicle;
 
 namespace TrafficFineManagement.API.Modules.Vehicles;
 
@@ -16,11 +21,83 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyCollection<VehiclesSummaryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyCollection<VehicleSummaryDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetVehicles(CancellationToken cancellationToken)
     {
-        var vehicles = await _vehiclesModule.GetVehiclesSummariesAsync(cancellationToken);
+        var vehicles = await _vehiclesModule.ExecuteQueryAsync(
+            new GetAllVehiclesQuery(),
+            cancellationToken);
 
         return Ok(vehicles);
+    }
+
+    [HttpGet("{vehicleId:guid}")]
+    [ProducesResponseType(typeof(VehicleDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetVehicle(
+        Guid vehicleId,
+        CancellationToken cancellationToken)
+    {
+        var vehicle = await _vehiclesModule.ExecuteQueryAsync(
+            new GetVehicleQuery(vehicleId),
+            cancellationToken);
+
+        return vehicle is null ? NotFound() : Ok(vehicle);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(VehicleResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateVehicle(
+        [FromBody] VehicleRequest request,
+        CancellationToken cancellationToken)
+    {
+        var vehicleId = await _vehiclesModule.ExecuteCommandAsync(
+            new VehicleCommand(
+                request.Plaka,
+                request.Brand,
+                request.Model),
+            cancellationToken);
+
+        return Ok(new VehicleResponse(vehicleId));
+    }
+
+    [HttpPost("{vehicleId:guid}/users")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddUser(
+        Guid vehicleId,
+        [FromBody] AddUserToVehicleRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _vehiclesModule.ExecuteCommandAsync(
+            new AddUserToVehicleCommand(
+                vehicleId,
+                request.UserId,
+                request.StartTime),
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPatch("{vehicleId:guid}/users/{userId:guid}/complete")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CompleteUsage(
+        Guid vehicleId,
+        Guid userId,
+        [FromBody] CompleteVehicleUsageRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _vehiclesModule.ExecuteCommandAsync(
+            new CompleteVehicleUsageCommand(
+                vehicleId,
+                userId,
+                request.EndTime),
+            cancellationToken);
+
+        return NoContent();
     }
 }

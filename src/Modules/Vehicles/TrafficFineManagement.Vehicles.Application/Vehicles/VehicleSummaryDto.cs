@@ -1,7 +1,8 @@
 namespace TrafficFineManagement.Modules.Vehicles.Application.Vehicles;
 
-public sealed record VehiclesSummaryDto(
+public sealed record VehicleSummaryDto(
     Guid Id,
     string Plaka,
     string Brand,
-    string Model);
+    string Model,
+    bool Status);
