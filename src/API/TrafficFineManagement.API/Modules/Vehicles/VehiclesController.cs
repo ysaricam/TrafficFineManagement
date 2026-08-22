@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles;
 
-namespace TrafficFineManagament.API.Modules.Vehicles;
+namespace TrafficFineManagement.API.Modules.Vehicles;
 
 [ApiController]
 [Route("api/vehicles")]
