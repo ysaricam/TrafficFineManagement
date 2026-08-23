@@ -8,6 +8,8 @@ using TrafficFineManagement.Modules.TrafficFine.Application.Fines.ApproveFineByM
 using TrafficFineManagement.Modules.TrafficFine.Application.Fines.ApproveFineByFinance;
 using TrafficFineManagement.Modules.TrafficFine.Application.Fines.RejectFine;
 using TrafficFineManagement.Modules.TrafficFine.Application.Fines.CompleteFine;
+using TrafficFineManagement.Modules.TrafficFine.Application.Users.SynchronizeUser;
+using TrafficFineManagement.Modules.TrafficFine.Application.Vehicles.SynchronizeVehicle;
 
 namespace TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.Processing;
 
@@ -27,6 +29,8 @@ public static class TrafficFineProcessingRegistration
         services.AddTransient<IValidator<ApproveFineByFinanceCommand>, ApproveFineByFinanceCommandValidator>();
         services.AddTransient<IValidator<RejectFineCommand>, RejectFineCommandValidator>();
         services.AddTransient<IValidator<CompleteFineCommand>, CompleteFineCommandValidator>();
+        services.AddTransient<IValidator<SynchronizeUserCommand>, SynchronizeUserCommandValidator>();
+        services.AddTransient<IValidator<SynchronizeVehicleCommand>, SynchronizeVehicleCommandValidator>();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnitOfWorkBehavior<,>));
 
         services.AddSingleton<UserCreatedIntegrationEventHandler>();

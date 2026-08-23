@@ -13,7 +13,11 @@ public sealed class UserSeedHostedService : IHostedService
         new("Test", "Yönetici", "manager", UserRole.Manager),
         new("Test", "Finansçı", "finance", UserRole.Finance),
         new("Test", "Admin", "admin", UserRole.Admin),
-        new("Test", "Ceza Görevlisi", "fineofficer", UserRole.FineOfficer)
+        new("Test", "Ceza Görevlisi", "fineofficer", UserRole.FineOfficer),
+        new("Ayşe", "Yılmaz", "driver.ayse", UserRole.Driver),
+        new("Mehmet", "Kaya", "driver.mehmet", UserRole.Driver),
+        new("Elif", "Demir", "driver.elif", UserRole.Driver),
+        new("Can", "Aydın", "driver.can", UserRole.Driver)
     ];
 
     private readonly IConfiguration _configuration;

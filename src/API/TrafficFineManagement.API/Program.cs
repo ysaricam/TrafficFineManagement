@@ -65,12 +65,18 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(
     VehiclesStartup.ConfigureContainer);
 
+var quartzEnabled = builder.Configuration.GetValue("Quartz:Enabled", true);
+
 builder.Services.AddVehiclesProcessing();
-builder.Services.AddVehiclesQuartz();
 builder.Services.AddTrafficFineProcessing();
-builder.Services.AddTrafficFineQuartz();
 builder.Services.AddUsersProcessing();
-builder.Services.AddUsersQuartz();
+
+if (quartzEnabled)
+{
+    builder.Services.AddVehiclesQuartz();
+    builder.Services.AddTrafficFineQuartz();
+    builder.Services.AddUsersQuartz();
+}
 
 var vehiclesConnectionString = builder.Configuration.GetConnectionString("VehiclesConnectionString")
     ?? throw new InvalidOperationException("VehiclesConnectionString is not configured.");
@@ -89,6 +95,7 @@ var usersConnectionString = builder.Configuration
 
 builder.Services.AddUsersPersistence(usersConnectionString);
 builder.Services.AddHostedService<UserSeedHostedService>();
+builder.Services.AddHostedService<DemoDataSeedHostedService>();
 
 var app = builder.Build();
 
