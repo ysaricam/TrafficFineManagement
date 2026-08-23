@@ -17,5 +17,7 @@ public sealed class VehicleCommandValidator : AbstractValidator<VehicleCommand>
         RuleFor(x => x.Model)
             .NotEmpty()
             .WithMessage("Model cannot be empty.");
+
+        RuleFor(x => x.Type).IsInEnum();
     }
 }

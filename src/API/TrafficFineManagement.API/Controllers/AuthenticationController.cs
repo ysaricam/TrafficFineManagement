@@ -24,7 +24,7 @@ public sealed class AuthenticationController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return Redirect("/vehicles");
+            return Redirect("/traffic-fines");
         }
 
         return View("~/Views/Authentication/Login.cshtml",
@@ -55,7 +55,7 @@ public sealed class AuthenticationController : Controller
 
             return Url.IsLocalUrl(input.ReturnUrl)
                 ? LocalRedirect(input.ReturnUrl!)
-                : Redirect("/vehicles");
+                : Redirect("/traffic-fines");
         }
         catch (InvalidCredentialsException)
         {

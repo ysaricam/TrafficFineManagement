@@ -1,3 +1,5 @@
+using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
+
 namespace TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
 
 public sealed class VehicleDto
@@ -10,9 +12,13 @@ public sealed class VehicleDto
 
     public string Model { get; set; } = string.Empty;
 
+    public VehicleType Type { get; set; }
+
     public bool Status { get; set; }
 
     public Guid? ActiveUserId { get; set; }
 
     public DateTime? ActiveUsageStartTime { get; set; }
+
+    public DateTime LastModifiedAt { get; set; }
 }

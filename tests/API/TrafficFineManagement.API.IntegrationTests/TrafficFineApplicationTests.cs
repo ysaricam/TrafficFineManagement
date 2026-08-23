@@ -34,7 +34,7 @@ public sealed class TrafficFineApplicationTests : IAsyncLifetime
     public async Task FullWorkflow_ShouldAuthenticateProjectEventsAndEnforceRoles()
     {
         using var adminClient = CreateClient();
-        await AssertMigrationHistoryAsync(expectedMigrationCount: 14);
+        await AssertMigrationHistoryAsync(expectedMigrationCount: 16);
 
         var bootstrapResponse = await adminClient.PostAsJsonAsync(
             "/api/users/bootstrap",
@@ -76,13 +76,31 @@ public sealed class TrafficFineApplicationTests : IAsyncLifetime
 
         var vehicleResponse = await adminClient.PostAsJsonAsync(
             "/api/vehicles",
-            new { Plaka = "34 TEST 001", Brand = "Test", Model = "Vehicle" });
+            new
+            {
+                Plaka = "34 TEST 001",
+                Brand = "Test",
+                Model = "Vehicle",
+                Type = 0
+            });
         vehicleResponse.EnsureSuccessStatusCode();
         var vehicleId = await ReadGuidAsync(vehicleResponse, "vehicleId");
 
         await WaitForTrafficFineProjectionsAsync(
             expectedUserCount: 5,
             vehicleId);
+
+        var secondVehicleResponse = await adminClient.PostAsJsonAsync(
+            "/api/vehicles",
+            new
+            {
+                Plaka = "34 TEST 002",
+                Brand = "Test",
+                Model = "Second Vehicle",
+                Type = 1
+            });
+        secondVehicleResponse.EnsureSuccessStatusCode();
+        var secondVehicleId = await ReadGuidAsync(secondVehicleResponse, "vehicleId");
 
         var usageStartTime = DateTime.UtcNow.AddMinutes(-1);
         var assignManagerResponse = await adminClient.PostAsJsonAsync(
@@ -94,6 +112,20 @@ public sealed class TrafficFineApplicationTests : IAsyncLifetime
             $"/api/vehicles/{vehicleId}/users",
             new { UserId = driverId, StartTime = usageStartTime });
         Assert.Equal(HttpStatusCode.NoContent, assignDriverResponse.StatusCode);
+
+        var assignActiveDriverToSecondVehicleResponse = await adminClient.PostAsJsonAsync(
+            $"/api/vehicles/{secondVehicleId}/users",
+            new { UserId = driverId, StartTime = usageStartTime });
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            assignActiveDriverToSecondVehicleResponse.StatusCode);
+
+        var orderedVehicles = await adminClient.GetFromJsonAsync<JsonElement>(
+            "/api/vehicles");
+        Assert.Equal(vehicleId, orderedVehicles[0].GetProperty("id").GetGuid());
+        Assert.Equal(0, orderedVehicles[0].GetProperty("type").GetInt32());
+        Assert.Equal(secondVehicleId, orderedVehicles[1].GetProperty("id").GetGuid());
+        Assert.Equal(1, orderedVehicles[1].GetProperty("type").GetInt32());
 
         using var driverClient = CreateClient();
         await LoginAsync(driverClient, "driver", "DriverPassword123!");
@@ -219,7 +251,7 @@ public sealed class TrafficFineApplicationTests : IAsyncLifetime
             vehicleUsages[1].GetProperty("startTime").GetDateTime());
         Assert.Equal(JsonValueKind.Null, vehicleUsages[1].GetProperty("endTime").ValueKind);
 
-        await AssertMigrationHistoryAsync(expectedMigrationCount: 14);
+        await AssertMigrationHistoryAsync(expectedMigrationCount: 16);
     }
 
     private HttpClient CreateClient()

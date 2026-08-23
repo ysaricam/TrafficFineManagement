@@ -22,7 +22,8 @@ public sealed class VehicleCommandHandler : ICommandHandler<VehicleCommand, Guid
         var vehicle = DomainVehicle.Create(
             request.Plaka,
             request.Brand,
-            request.Model);
+            request.Model,
+            request.Type);
 
         await _vehicleRepository.AddAsync(vehicle, cancellationToken);
 

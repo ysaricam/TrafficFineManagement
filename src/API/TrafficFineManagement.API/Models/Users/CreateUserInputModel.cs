@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using TrafficFineManagement.Modules.Users.Domain.Users;
 
 namespace TrafficFineManagement.API.Models.Users;
 
@@ -17,6 +16,9 @@ public sealed class CreateUserInputModel
     [Required, StringLength(128, MinimumLength = 8)]
     public string Password { get; init; } = string.Empty;
 
-    [Required]
-    public UserRole Role { get; init; }
+    public Guid VehicleId { get; init; }
+
+    public DateTime? StartTime { get; init; }
+
+    public int TimeZoneOffsetMinutes { get; init; }
 }

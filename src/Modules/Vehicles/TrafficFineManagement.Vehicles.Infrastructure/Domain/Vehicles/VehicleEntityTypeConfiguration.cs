@@ -22,9 +22,15 @@ internal sealed class VehicleEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.Model)
             .HasField("_model")
             .HasColumnName("Model");
+        builder.Property(x => x.Type)
+            .HasField("_type")
+            .HasColumnName("Type");
         builder.Property(x => x.Status)
             .HasField("_status")
             .HasColumnName("Status");
+        builder.Property(x => x.LastModifiedAt)
+            .HasField("_lastModifiedAt")
+            .HasColumnName("LastModifiedAt");
 
         builder.Ignore(x => x.Users);
         builder.OwnsMany<VehicleUser>("_users", user =>

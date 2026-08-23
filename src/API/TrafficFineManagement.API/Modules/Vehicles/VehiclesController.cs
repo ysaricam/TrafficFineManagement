@@ -58,7 +58,8 @@ public sealed class VehiclesController : ControllerBase
             new VehicleCommand(
                 request.Plaka,
                 request.Brand,
-                request.Model),
+                request.Model,
+                request.Type),
             cancellationToken);
 
         return Ok(new VehicleResponse(vehicleId));

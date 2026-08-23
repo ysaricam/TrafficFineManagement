@@ -7,10 +7,13 @@ using TrafficFineManagement.Modules.Users.Application.Contracts;
 using TrafficFineManagement.Modules.Users.Application.Users.CreateUser;
 using TrafficFineManagement.Modules.Users.Application.Users.GetAllUsers;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
+using TrafficFineManagement.Modules.Vehicles.Application.Users.SynchronizeUser;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.CompleteVehicleUsage;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.Vehicle;
+using UsersUserRole = TrafficFineManagement.Modules.Users.Domain.Users.UserRole;
+using VehiclesUserRole = TrafficFineManagement.Modules.Vehicles.Domain.Users.UserRole;
 
 namespace TrafficFineManagement.API.Controllers;
 
@@ -58,7 +61,11 @@ public sealed class VehiclesPageController : Controller
         }
 
         var vehicleId = await _vehiclesModule.ExecuteCommandAsync(
-            new VehicleCommand(input.Plaka, input.Brand, input.Model),
+            new VehicleCommand(
+                input.Plaka,
+                input.Brand,
+                input.Model,
+                input.Type),
             cancellationToken);
 
         TempData["Success"] = $"{input.Plaka} plakalı araç oluşturuldu.";
@@ -74,9 +81,21 @@ public sealed class VehiclesPageController : Controller
         CreateUserInputModel input,
         CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || input.VehicleId == Guid.Empty)
         {
-            TempData["Error"] = "Kullanıcı bilgileri eksik veya geçersiz.";
+            TempData["Error"] = "Kullanıcı veya araç bilgileri eksik ya da geçersiz.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var startTime = input.StartTime.HasValue
+            ? BrowserLocalTime.ToUtc(
+                input.StartTime.Value,
+                input.TimeZoneOffsetMinutes)
+            : DateTime.UtcNow;
+
+        if (startTime > DateTime.UtcNow.AddMinutes(1))
+        {
+            TempData["Error"] = "Başlangıç zamanı gelecekte olamaz.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -86,10 +105,23 @@ public sealed class VehiclesPageController : Controller
                 input.Surname,
                 input.Username,
                 input.Password,
-                input.Role),
+                UsersUserRole.Driver),
             cancellationToken);
 
-        TempData["Success"] = $"Yeni kullanıcı oluşturuldu: {userId}";
+        await _vehiclesModule.ExecuteCommandAsync(
+            new SynchronizeUserCommand(
+                userId,
+                VehiclesUserRole.Driver),
+            cancellationToken);
+
+        await _vehiclesModule.ExecuteCommandAsync(
+            new AddUserToVehicleCommand(
+                input.VehicleId,
+                userId,
+                startTime),
+            cancellationToken);
+
+        TempData["Success"] = "Yeni şoför oluşturuldu ve araca atandı.";
 
         return RedirectToAction(nameof(Index));
     }

@@ -1,5 +1,6 @@
 using TrafficFineManagement.Modules.Users.Application.Users.GetAllUsers;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
+using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
 namespace TrafficFineManagement.API.Models.Vehicles;
 
@@ -50,5 +51,17 @@ public sealed class VehicleListViewModel
         return _usersById.TryGetValue(userId.Value, out var user)
             ? $"{user.Name} {user.Surname} (@{user.Username})"
             : userId.Value.ToString();
+    }
+
+    public static string GetVehicleTypeLabel(VehicleType type)
+    {
+        return type switch
+        {
+            VehicleType.Passenger => "Binek",
+            VehicleType.Tractor => "Çekici",
+            VehicleType.Trailer => "Dorse",
+            VehicleType.Rental => "Kiralık araç",
+            _ => type.ToString()
+        };
     }
 }

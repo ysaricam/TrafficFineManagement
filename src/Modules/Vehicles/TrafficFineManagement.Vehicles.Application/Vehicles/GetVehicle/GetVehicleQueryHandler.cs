@@ -25,6 +25,7 @@ public sealed class GetVehicleQueryHandler : IQueryHandler<GetVehicleQuery, Vehi
                 "Plaka",
                 "Brand",
                 "Model",
+                "Type",
                 "Status"
             FROM vehicles."VehicleReadModel"
             WHERE "Id" = @VehicleId;
@@ -62,6 +63,7 @@ public sealed class GetVehicleQueryHandler : IQueryHandler<GetVehicleQuery, Vehi
             vehicle.Plaka,
             vehicle.Brand,
             vehicle.Model,
+            vehicle.Type,
             vehicle.Status,
             users);
     }

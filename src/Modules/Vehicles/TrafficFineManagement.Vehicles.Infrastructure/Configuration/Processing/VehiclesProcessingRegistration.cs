@@ -5,6 +5,7 @@ using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.CompleteVehicleUsage;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.Vehicle;
+using TrafficFineManagement.Modules.Vehicles.Application.Users.SynchronizeUser;
 using TrafficFineManagement.Modules.Vehicles.Infrastructure.Configuration.Validation;
 using TrafficFineManagement.Modules.Vehicles.Infrastructure.IntegrationEvents;
 
@@ -22,6 +23,7 @@ public static class VehiclesProcessingRegistration
         services.AddTransient<IValidator<VehicleCommand>, VehicleCommandValidator>();
         services.AddTransient<IValidator<AddUserToVehicleCommand>, AddUserToVehicleCommandValidator>();
         services.AddTransient<IValidator<CompleteVehicleUsageCommand>, CompleteVehicleUsageCommandValidator>();
+        services.AddTransient<IValidator<SynchronizeUserCommand>, SynchronizeUserCommandValidator>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnitOfWorkBehavior<,>));

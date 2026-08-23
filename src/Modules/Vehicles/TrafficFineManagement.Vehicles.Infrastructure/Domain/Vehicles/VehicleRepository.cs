@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TrafficFineManagement.Modules.Vehicles.Domain.Users;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 using TrafficFineManagement.Modules.Vehicles.Infrastructure;
 
@@ -24,6 +25,18 @@ public sealed class VehicleRepository : IVehicleRepository
     {
         return _context.Vehicles.FirstOrDefaultAsync(
             x => x.Id == vehicleId,
+            cancellationToken);
+    }
+
+    public Task<bool> HasActiveVehicleAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default)
+    {
+        return _context.Vehicles.AnyAsync(
+            vehicle => EF.Property<List<VehicleUser>>(vehicle, "_users")
+                .Any(usage =>
+                    usage.UserId == userId &&
+                    usage.EndTime == null),
             cancellationToken);
     }
 

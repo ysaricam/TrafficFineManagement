@@ -103,6 +103,7 @@
                             </td>
                             <td data-label="Araç">
                                 <strong class="vehicle-name">@vehicle.Brand @vehicle.Model</strong>
+                                <span class="vehicle-id">Tür · @VehicleListViewModel.GetVehicleTypeLabel(vehicle.Type)</span>
                                 <span class="vehicle-id">@vehicle.Id</span>
                             </td>
                             <td data-label="Durum">
@@ -178,6 +179,15 @@
                     <input name="Model" autocomplete="off" placeholder="Corolla" required />
                 </label>
             </div>
+            <label>
+                <span>Araç tipi</span>
+                <select name="Type" required>
+                    <option value="0">Binek</option>
+                    <option value="1">Çekici</option>
+                    <option value="2">Dorse</option>
+                    <option value="3">Kiralık araç</option>
+                </select>
+            </label>
             <div class="dialog-actions">
                 <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
                 <button class="button button-primary" type="submit">Aracı oluştur</button>
@@ -223,6 +233,9 @@
         {
         <div class="dialog-divider"><span>veya</span></div>
         <form asp-action="CreateUser" method="post" class="inline-user-create">
+            <input id="create-user-vehicle-id" type="hidden" name="VehicleId" />
+            <input id="create-user-start-time" type="hidden" name="StartTime" />
+            <input id="create-user-timezone-offset" type="hidden" name="TimeZoneOffsetMinutes" />
             <label>
                 <span>İsim</span>
                 <input name="Name" autocomplete="given-name" required maxlength="100" />
@@ -239,17 +252,7 @@
                 <span>Parola</span>
                 <input name="Password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" />
             </label>
-            <label>
-                <span>Rol</span>
-                <select name="Role" required>
-                    <option value="0">Şoför</option>
-                    <option value="1">Yönetici</option>
-                    <option value="2">Finansçı</option>
-                    <option value="3">Admin</option>
-                    <option value="4">Ceza Görevlisi</option>
-                </select>
-            </label>
-            <button class="button button-secondary button-small" type="submit">+ Kullanıcı oluştur</button>
+            <button class="button button-secondary button-small" type="submit">+ Şoför oluştur ve ata</button>
         </form>
         }
 
@@ -308,6 +311,7 @@
 
             if (dialog.id === 'assign-user-dialog') {
                 document.getElementById('assign-vehicle-id').value = button.dataset.vehicleId;
+                document.getElementById('create-user-vehicle-id').value = button.dataset.vehicleId;
                 document.getElementById('assign-vehicle-label').textContent = button.dataset.vehicleLabel;
             }
 
@@ -364,6 +368,14 @@
     document.querySelectorAll('[data-dialog-close]').forEach(button => {
         button.addEventListener('click', () => button.closest('dialog').close());
     });
+
+    const createUserForm = document.querySelector('.inline-user-create');
+    if (createUserForm) {
+        createUserForm.addEventListener('submit', () => {
+            document.getElementById('create-user-start-time').value = usageStartTime.value;
+            document.getElementById('create-user-timezone-offset').value = usageTimezoneOffset.value;
+        });
+    }
 
     document.querySelectorAll('dialog').forEach(dialog => {
         dialog.addEventListener('click', event => {

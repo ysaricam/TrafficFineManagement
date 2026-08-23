@@ -25,9 +25,11 @@ public sealed class GetAllVehiclesQueryHandler :
                 "Plaka",
                 "Brand",
                 "Model",
+                "Type",
                 "Status",
                 "ActiveUserId",
-                "ActiveUsageStartTime"
+                "ActiveUsageStartTime",
+                "LastModifiedAt"
             FROM
             (
                 SELECT DISTINCT ON ("Id")
@@ -35,7 +37,9 @@ public sealed class GetAllVehiclesQueryHandler :
                     "Plaka",
                     "Brand",
                     "Model",
+                    "Type",
                     "Status",
+                    "LastModifiedAt",
                     CASE WHEN "EndTime" IS NULL THEN "UserId" END AS "ActiveUserId",
                     CASE WHEN "EndTime" IS NULL THEN "StartTime" END AS "ActiveUsageStartTime"
                 FROM vehicles."VehicleReadModel"
@@ -44,7 +48,7 @@ public sealed class GetAllVehiclesQueryHandler :
                     ("UserId" IS NOT NULL AND "EndTime" IS NULL) DESC,
                     "StartTime" DESC NULLS LAST
             ) AS vehicle
-            ORDER BY "Plaka", "Id";
+            ORDER BY "LastModifiedAt" DESC, "Id";
             """;
 
         using var connection = _sqlConnectionFactory.GetOpenConnection();

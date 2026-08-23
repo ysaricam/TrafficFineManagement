@@ -86,7 +86,22 @@ a {
 
 nav {
     display: flex;
+    align-items: center;
     gap: 8px;
+}
+
+.nav-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-separator {
+    color: rgba(23, 34, 30, 0.28);
+}
+
+.nav-account form {
+    margin: 0;
 }
 
 .nav-link {
@@ -1066,6 +1081,7 @@ tbody tr:hover {
 
     .brand small,
     .nav-link:not(.active),
+    .nav-separator,
     .live-indicator {
         display: none;
     }

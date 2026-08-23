@@ -185,7 +185,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGet("/", () => Results.Redirect("/vehicles"));
+app.MapGet("/", () => Results.Redirect("/traffic-fines"));
 
 app.Run();
 

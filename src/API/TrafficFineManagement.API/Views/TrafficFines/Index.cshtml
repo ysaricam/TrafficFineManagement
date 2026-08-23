@@ -102,7 +102,8 @@
                         </td>
                         <td data-label="Araç ve kullanıcı">
                             <strong class="vehicle-name">@Model.GetVehicleLabel(fine.VehicleId)</strong>
-                            <span class="vehicle-id">Kullanıcı · @fine.FinedUserId</span>
+                            <span class="vehicle-id">Tür · @Model.GetVehicleTypeLabel(fine.VehicleId)</span>
+                            <span class="vehicle-id">Kullanıcı · @Model.GetUserLabel(fine.FinedUserId)</span>
                         </td>
                         <td data-label="Tutar">
                             <strong class="fine-amount">@fine.Amount.ToString("N2") @fine.Currency</strong>

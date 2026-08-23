@@ -13,7 +13,7 @@
 </head>
 <body>
     <header class="site-header">
-        <a class="brand" href="/vehicles" aria-label="Araç yönetimi ana sayfası">
+        <a class="brand" href="/traffic-fines" aria-label="Trafik cezası yönetimi ana sayfası">
             <span class="brand-mark" aria-hidden="true">TF</span>
             <span>
                 <strong>Trafik Yönetimi</strong>
@@ -23,17 +23,18 @@
         <nav aria-label="Ana navigasyon">
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a class="nav-link @(isVehiclesPage ? "active" : null)" href="/vehicles">Araçlar</a>
-                <a class="nav-link @(isTrafficFinesPage ? "active" : null)" href="/traffic-fines">Cezalar</a>
-            }
-            <a class="nav-link" href="/health">Sistem</a>
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <span class="nav-link">@User.Identity.Name</span>
-                <form method="post" action="/logout">
-                    @Html.AntiForgeryToken()
-                    <button class="nav-link" type="submit">Çıkış</button>
-                </form>
+                <span class="nav-section nav-pages">
+                    <a class="nav-link @(isTrafficFinesPage ? "active" : null)" href="/traffic-fines">Cezalar</a>
+                    <a class="nav-link @(isVehiclesPage ? "active" : null)" href="/vehicles">Araçlar</a>
+                </span>
+                <span class="nav-separator" aria-hidden="true">|</span>
+                <span class="nav-section nav-account">
+                    <span class="nav-link">@User.Identity.Name</span>
+                    <form method="post" action="/logout">
+                        @Html.AntiForgeryToken()
+                        <button class="nav-link" type="submit">Çıkış</button>
+                    </form>
+                </span>
             }
         </nav>
     </header>

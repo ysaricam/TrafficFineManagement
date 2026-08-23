@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
 namespace TrafficFineManagement.API.Models.Vehicles;
 
@@ -12,4 +13,7 @@ public sealed class CreateVehicleInputModel
 
     [Required(ErrorMessage = "Model zorunludur.")]
     public string Model { get; init; } = string.Empty;
+
+    [Required(ErrorMessage = "Araç tipi zorunludur.")]
+    public VehicleType Type { get; init; }
 }

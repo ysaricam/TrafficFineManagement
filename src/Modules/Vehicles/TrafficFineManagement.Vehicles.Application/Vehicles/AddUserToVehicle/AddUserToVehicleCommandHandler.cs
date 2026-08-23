@@ -3,6 +3,7 @@ using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users.Rules;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
+using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles.Rules;
 
 namespace TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
 
@@ -45,6 +46,16 @@ public sealed class AddUserToVehicleCommandHandler : ICommandHandler<AddUserToVe
         {
             throw new BusinessRuleValidationException(
                 new OnlyDriverCanBeAssignedToVehicleRule(user.Role));
+        }
+
+        var hasActiveVehicle = await _vehicleRepository.HasActiveVehicleAsync(
+            user.Id,
+            cancellationToken);
+
+        if (hasActiveVehicle)
+        {
+            throw new BusinessRuleValidationException(
+                new DriverCanHaveOnlyOneActiveVehicleRule(hasActiveVehicle));
         }
 
         vehicle.AddUser(user.Id, request.StartTime);

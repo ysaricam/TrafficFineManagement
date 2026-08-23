@@ -10,7 +10,11 @@ public sealed class VehicleDomainEventsTests
     [Fact]
     public void Create_ShouldAddVehicleCreatedDomainEvent()
     {
-        var vehicle = Vehicle.Create("34 TFM 001", "Toyota", "Corolla");
+        var vehicle = Vehicle.Create(
+            "34 TFM 001",
+            "Toyota",
+            "Corolla",
+            VehicleType.Passenger);
 
         var domainEvent = Assert.IsType<VehicleCreatedDomainEvent>(
             Assert.Single(vehicle.DomainEvents!));
@@ -114,7 +118,11 @@ public sealed class VehicleDomainEventsTests
     [Fact]
     public void ClearDomainEvents_ShouldRemoveAllEvents()
     {
-        var vehicle = Vehicle.Create("34 TFM 002", "Honda", "Civic");
+        var vehicle = Vehicle.Create(
+            "34 TFM 002",
+            "Honda",
+            "Civic",
+            VehicleType.Passenger);
 
         vehicle.ClearDomainEvents();
 
@@ -123,7 +131,11 @@ public sealed class VehicleDomainEventsTests
 
     private static Vehicle CreateVehicleWithoutDomainEvents()
     {
-        var vehicle = Vehicle.Create("34 TFM 003", "Ford", "Focus");
+        var vehicle = Vehicle.Create(
+            "34 TFM 003",
+            "Ford",
+            "Focus",
+            VehicleType.Passenger);
         vehicle.ClearDomainEvents();
 
         return vehicle;
