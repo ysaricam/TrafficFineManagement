@@ -52,12 +52,13 @@ public class Vehicle : Entity, IAggregateRoot
     {
         if (_status) return;
 
-        _users.Add(VehicleUser.Create(id, startTime));
+        var vehicleUser = VehicleUser.Create(id, startTime);
+        _users.Add(vehicleUser);
 
         _status = true;
 
-        AddDomainEvent(new VehicleAddUserDomainEvent(Id, id));
-        AddDomainEvent(new VehicleStatusUpdated(Id, _status));
+        AddDomainEvent(new VehicleAddUserDomainEvent(Id, id, vehicleUser.StartTime));
+        AddDomainEvent(new VehicleStatusUpdatedDomainEvent(Id, _status));
     }
 
     public void UpdateStatus(UserId id, DateTime endTime)
@@ -69,6 +70,6 @@ public class Vehicle : Entity, IAggregateRoot
         user.Complete(endTime);
         _status = false;
 
-        AddDomainEvent(new VehicleStatusUpdated(Id, _status));
+        AddDomainEvent(new VehicleStatusUpdatedDomainEvent(Id, _status));
     }
 }

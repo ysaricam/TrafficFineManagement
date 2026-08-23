@@ -1,31 +1,43 @@
+using Dapper;
+using TrafficFineManagement.BuildingBlocks.Application.Data;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
-using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
 namespace TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
 
 public sealed class GetAllVehiclesQueryHandler :
-    IQueryHandler<GetAllVehiclesQuery, IReadOnlyCollection<VehicleSummaryDto>>
+    IQueryHandler<GetAllVehiclesQuery, IReadOnlyCollection<VehicleDto>>
 {
-    private readonly IVehicleRepository _vehicleRepository;
+    private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-    public GetAllVehiclesQueryHandler(IVehicleRepository vehicleRepository)
+    public GetAllVehiclesQueryHandler(ISqlConnectionFactory sqlConnectionFactory)
     {
-        _vehicleRepository = vehicleRepository;
+        _sqlConnectionFactory = sqlConnectionFactory;
     }
 
-    public async Task<IReadOnlyCollection<VehicleSummaryDto>> Handle(
+    public async Task<IReadOnlyCollection<VehicleDto>> Handle(
         GetAllVehiclesQuery request,
         CancellationToken cancellationToken)
     {
-        var vehicles = await _vehicleRepository.GetAllAsync(cancellationToken);
+        const string sql =
+            """
+            SELECT DISTINCT
+                "Id",
+                "Plaka",
+                "Brand",
+                "Model",
+                "Status"
+            FROM vehicles."VehicleReadModel"
+            ORDER BY "Plaka", "Id";
+            """;
 
-        return vehicles
-            .Select(vehicle => new VehicleSummaryDto(
-                vehicle.Id.Value,
-                vehicle.Plaka,
-                vehicle.Brand,
-                vehicle.Model,
-                vehicle.Status))
-            .ToList();
+        using var connection = _sqlConnectionFactory.GetOpenConnection();
+
+        var command = new CommandDefinition(
+            sql,
+            cancellationToken: cancellationToken);
+
+        var vehicles = await connection.QueryAsync<VehicleDto>(command);
+
+        return vehicles.AsList();
     }
 }

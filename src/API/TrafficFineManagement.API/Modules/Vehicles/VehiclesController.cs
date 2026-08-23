@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
-using TrafficFineManagement.Modules.Vehicles.Application.Vehicles;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.CompleteVehicleUsage;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
@@ -21,7 +20,7 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyCollection<VehicleSummaryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyCollection<VehicleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetVehicles(CancellationToken cancellationToken)
     {
         var vehicles = await _vehiclesModule.ExecuteQueryAsync(

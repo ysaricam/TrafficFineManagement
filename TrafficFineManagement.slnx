@@ -15,4 +15,9 @@
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Infrastructure/TrafficFineManagement.Vehicles.Infrastructure.csproj" />
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.IntegrationEvents/TrafficFineManagement.Vehicles.IntegrationEvents.csproj" />
   </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Vehicles/">
+    <Project Path="tests/Modules/Vehicles/TrafficFineManagement.Vehicles.Domain.UnitTests/TrafficFineManagement.Vehicles.Domain.UnitTests.csproj" />
+  </Folder>
 </Solution>

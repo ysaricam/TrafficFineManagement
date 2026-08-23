@@ -1,41 +1,68 @@
+using Dapper;
+using TrafficFineManagement.BuildingBlocks.Application.Data;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
-using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
+using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
 
 namespace TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetVehicle;
 
 public sealed class GetVehicleQueryHandler : IQueryHandler<GetVehicleQuery, VehicleDetailsDto?>
 {
-    private readonly IVehicleRepository _vehicleRepository;
+    private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-    public GetVehicleQueryHandler(IVehicleRepository vehicleRepository)
+    public GetVehicleQueryHandler(ISqlConnectionFactory sqlConnectionFactory)
     {
-        _vehicleRepository = vehicleRepository;
+        _sqlConnectionFactory = sqlConnectionFactory;
     }
 
     public async Task<VehicleDetailsDto?> Handle(
         GetVehicleQuery request,
         CancellationToken cancellationToken)
     {
-        var vehicle = await _vehicleRepository.GetByIdAsync(
-            new VehicleId(request.VehicleId),
-            cancellationToken);
+        const string sql =
+            """
+            SELECT DISTINCT
+                "Id",
+                "Plaka",
+                "Brand",
+                "Model",
+                "Status"
+            FROM vehicles."VehicleReadModel"
+            WHERE "Id" = @VehicleId;
+
+            SELECT
+                "UserId",
+                "StartTime",
+                "EndTime"
+            FROM vehicles."VehicleReadModel"
+            WHERE "Id" = @VehicleId
+              AND "UserId" IS NOT NULL
+            ORDER BY "StartTime";
+            """;
+
+        using var connection = _sqlConnectionFactory.GetOpenConnection();
+
+        var command = new CommandDefinition(
+            sql,
+            new { request.VehicleId },
+            cancellationToken: cancellationToken);
+
+        using var result = await connection.QueryMultipleAsync(command);
+
+        var vehicle = await result.ReadSingleOrDefaultAsync<VehicleDto>();
 
         if (vehicle is null)
         {
             return null;
         }
 
+        var users = (await result.ReadAsync<VehicleUserDto>()).AsList();
+
         return new VehicleDetailsDto(
-            vehicle.Id.Value,
+            vehicle.Id,
             vehicle.Plaka,
             vehicle.Brand,
             vehicle.Model,
             vehicle.Status,
-            vehicle.Users
-                .Select(user => new VehicleUserDto(
-                    user.UserId.Value,
-                    user.StartTime,
-                    user.EndTime))
-                .ToList());
+            users);
     }
 }

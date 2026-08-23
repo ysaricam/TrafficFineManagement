@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.DependencyInjection;
 using TrafficFineManagament.BuildingBlocks.Infrastructure;
+using TrafficFineManagement.BuildingBlocks.Application.Data;
+using TrafficFineManagement.BuildingBlocks.Infrastructure.Data;
+using TrafficFineManagement.BuildingBlocks.Infrastructure.DomainEventsDispatching;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
@@ -24,9 +27,15 @@ public static class VehiclesPersistenceRegistration
             options.ReplaceService<IValueConverterSelector, StronglyTypedIdValueConverterSelector>();
         });
 
+        services.AddSingleton<ISqlConnectionFactory>(
+            new SqlConnectionFactory(connectionString));
+
         services.AddScoped<IVehicleRepository, VehicleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUnitOfWork, VehiclesUnitOfWork>();
+        services.AddScoped<IDomainEventsAccessor>(serviceProvider =>
+            new DomainEventsAccessor(serviceProvider.GetRequiredService<VehiclesContext>()));
+        services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

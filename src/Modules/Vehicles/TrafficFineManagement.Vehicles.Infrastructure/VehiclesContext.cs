@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TrafficFineManagement.BuildingBlocks.Application.Outbox;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
@@ -13,6 +14,7 @@ public sealed class VehiclesContext : DbContext
 
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -27,12 +27,4 @@ public sealed class VehicleRepository : IVehicleRepository
             cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<Vehicle>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return await _context.Vehicles
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-    }
-
 }

@@ -22,11 +22,18 @@ public class VehicleUser : Entity
     private VehicleUser(UserId userId, DateTime startTime)
     {
         UserId = userId;
-        _startTime = startTime;
+        _startTime = NormalizeToUtc(startTime);
     }
 
     internal void Complete(DateTime endTime)
     {
-        _endTime = endTime;
+        _endTime = NormalizeToUtc(endTime);
+    }
+
+    private static DateTime NormalizeToUtc(DateTime value)
+    {
+        return value.Kind == DateTimeKind.Utc
+            ? value
+            : value.ToUniversalTime();
     }
 }
