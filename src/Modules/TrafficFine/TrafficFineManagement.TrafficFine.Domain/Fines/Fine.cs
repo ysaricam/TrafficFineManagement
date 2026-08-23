@@ -15,6 +15,7 @@ public sealed class Fine : Entity, IAggregateRoot
     private string _reason = string.Empty;
     private DateTime _fineDate;
     private FineStatus _status;
+    private FineActionType _currentAction;
     private readonly List<FineApprovalHistory> _approvalHistory;
 
     private Fine()
@@ -55,6 +56,7 @@ public sealed class Fine : Entity, IAggregateRoot
         _reason = reason.Trim();
         _fineDate = NormalizeToUtc(fineDate);
         _status = FineStatus.Active;
+        _currentAction = FineActionType.Created;
         _approvalHistory = [];
 
         AddApprovalHistory(
@@ -90,6 +92,8 @@ public sealed class Fine : Entity, IAggregateRoot
     public DateTime FineDate => _fineDate;
 
     public FineStatus Status => _status;
+
+    public FineActionType CurrentAction => _currentAction;
 
     public IReadOnlyCollection<FineApprovalHistory> ApprovalHistory =>
         _approvalHistory.AsReadOnly();
@@ -193,7 +197,7 @@ public sealed class Fine : Entity, IAggregateRoot
     {
         CheckRule(new FineMustBeActiveRule(_status));
         CheckRule(new FineActionMustFollowRule(
-            CurrentAction,
+            _currentAction,
             expectedCurrentAction,
             newAction));
 
@@ -203,8 +207,6 @@ public sealed class Fine : Entity, IAggregateRoot
             performedByUserId,
             description);
     }
-
-    private FineActionType CurrentAction => _approvalHistory[^1].ActionType;
 
     private void RecordAction(
         FineActionType actionType,
@@ -216,6 +218,7 @@ public sealed class Fine : Entity, IAggregateRoot
 
         var previousStatus = _status;
         _status = newStatus;
+        _currentAction = actionType;
 
         AddApprovalHistory(
             performedByUserId,

@@ -1,9 +1,10 @@
 using System.Data;
 using Npgsql;
+using TrafficFineManagement.Modules.TrafficFine.Application.Contracts;
 
 namespace TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.DataAccess;
 
-public sealed class TrafficFineSqlConnectionFactory
+public sealed class TrafficFineSqlConnectionFactory : ITrafficFineSqlConnectionFactory
 {
     private readonly string _connectionString;
 

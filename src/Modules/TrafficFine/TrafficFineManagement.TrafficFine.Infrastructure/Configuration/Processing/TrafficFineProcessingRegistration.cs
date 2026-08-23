@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using TrafficFineManagement.Modules.TrafficFine.Application.Contracts;
 using TrafficFineManagement.Modules.TrafficFine.Infrastructure.IntegrationEvents;
 using TrafficFineManagement.Modules.TrafficFine.Application.Fines.CreateFine;
+using TrafficFineManagement.Modules.TrafficFine.Application.Fines.ApproveFineByManager;
+using TrafficFineManagement.Modules.TrafficFine.Application.Fines.ApproveFineByFinance;
+using TrafficFineManagement.Modules.TrafficFine.Application.Fines.RejectFine;
+using TrafficFineManagement.Modules.TrafficFine.Application.Fines.CompleteFine;
 
 namespace TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.Processing;
 
@@ -19,6 +23,10 @@ public static class TrafficFineProcessingRegistration
 
         services.AddScoped<ITrafficFineModule, TrafficFineModule>();
         services.AddTransient<IValidator<CreateFineCommand>, CreateFineCommandValidator>();
+        services.AddTransient<IValidator<ApproveFineByManagerCommand>, ApproveFineByManagerCommandValidator>();
+        services.AddTransient<IValidator<ApproveFineByFinanceCommand>, ApproveFineByFinanceCommandValidator>();
+        services.AddTransient<IValidator<RejectFineCommand>, RejectFineCommandValidator>();
+        services.AddTransient<IValidator<CompleteFineCommand>, CompleteFineCommandValidator>();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnitOfWorkBehavior<,>));
 
         services.AddSingleton<UserCreatedIntegrationEventHandler>();

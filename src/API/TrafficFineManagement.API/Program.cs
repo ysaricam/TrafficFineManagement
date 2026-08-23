@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FluentValidation;
+using TrafficFineManagement.BuildingBlocks.Domain;
 using TrafficFineManagement.API.Modules.Vehicles;
 using TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.DataAccess;
 using TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.Processing;
@@ -60,6 +61,16 @@ app.Use(async (context, next) =>
             title = "Command validation error",
             status = StatusCodes.Status400BadRequest,
             errors
+        });
+    }
+    catch (BusinessRuleValidationException exception)
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await context.Response.WriteAsJsonAsync(new
+        {
+            title = "Business rule validation error",
+            status = StatusCodes.Status400BadRequest,
+            detail = exception.Message
         });
     }
     catch (KeyNotFoundException exception)

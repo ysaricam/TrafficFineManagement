@@ -33,7 +33,9 @@ public static class TrafficFinePersistenceRegistration
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<TrafficFineDomainEventsDispatcher>();
         services.AddSingleton<TrafficFineDomainNotificationsMapper>();
-        services.AddSingleton(new TrafficFineSqlConnectionFactory(connectionString));
+        var sqlConnectionFactory = new TrafficFineSqlConnectionFactory(connectionString);
+        services.AddSingleton(sqlConnectionFactory);
+        services.AddSingleton<ITrafficFineSqlConnectionFactory>(sqlConnectionFactory);
 
         return services;
     }

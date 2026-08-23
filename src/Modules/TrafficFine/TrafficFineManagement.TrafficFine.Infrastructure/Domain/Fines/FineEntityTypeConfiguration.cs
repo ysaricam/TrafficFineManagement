@@ -35,6 +35,9 @@ internal sealed class FineEntityTypeConfiguration : IEntityTypeConfiguration<Fin
         builder.Property(x => x.Status)
             .HasField("_status")
             .HasColumnName("Status");
+        builder.Property(x => x.CurrentAction)
+            .HasField("_currentAction")
+            .HasColumnName("CurrentAction");
 
         builder.OwnsOne(x => x.Amount, amount =>
         {
