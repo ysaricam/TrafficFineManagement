@@ -1,3 +1,4 @@
+using TrafficFineManagement.BuildingBlocks.Domain;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles.Events;
@@ -60,6 +61,25 @@ public sealed class VehicleDomainEventsTests
 
         Assert.Equal(vehicle.Id, domainEvent.VehicleId);
         Assert.False(domainEvent.Status);
+    }
+
+    [Fact]
+    public void UpdateStatus_WhenEndTimePrecedesStartTime_ShouldBreakBusinessRule()
+    {
+        var vehicle = CreateVehicleWithoutDomainEvents();
+        var userId = new UserId(Guid.NewGuid());
+        var startTime = DateTime.UtcNow;
+        vehicle.AddUser(userId, startTime);
+        vehicle.ClearDomainEvents();
+
+        var exception = Assert.Throws<BusinessRuleValidationException>(() =>
+            vehicle.UpdateStatus(userId, startTime.AddMinutes(-1)));
+
+        Assert.Equal(
+            "Vehicle usage end time cannot be earlier than its start time.",
+            exception.Message);
+        Assert.True(vehicle.Status);
+        Assert.Empty(vehicle.DomainEvents!);
     }
 
     [Fact]

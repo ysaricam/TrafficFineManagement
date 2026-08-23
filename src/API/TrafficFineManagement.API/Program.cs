@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 
 // Autofac
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -65,7 +65,9 @@ app.Use(async (context, next) =>
 });
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.MapControllers();
+app.MapGet("/", () => Results.Redirect("/vehicles"));
 
 app.Run();

@@ -20,13 +20,30 @@ public sealed class GetAllVehiclesQueryHandler :
     {
         const string sql =
             """
-            SELECT DISTINCT
+            SELECT
                 "Id",
                 "Plaka",
                 "Brand",
                 "Model",
-                "Status"
-            FROM vehicles."VehicleReadModel"
+                "Status",
+                "ActiveUserId",
+                "ActiveUsageStartTime"
+            FROM
+            (
+                SELECT DISTINCT ON ("Id")
+                    "Id",
+                    "Plaka",
+                    "Brand",
+                    "Model",
+                    "Status",
+                    CASE WHEN "EndTime" IS NULL THEN "UserId" END AS "ActiveUserId",
+                    CASE WHEN "EndTime" IS NULL THEN "StartTime" END AS "ActiveUsageStartTime"
+                FROM vehicles."VehicleReadModel"
+                ORDER BY
+                    "Id",
+                    ("UserId" IS NOT NULL AND "EndTime" IS NULL) DESC,
+                    "StartTime" DESC NULLS LAST
+            ) AS vehicle
             ORDER BY "Plaka", "Id";
             """;
 

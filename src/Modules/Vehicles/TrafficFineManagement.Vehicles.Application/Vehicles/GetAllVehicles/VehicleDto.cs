@@ -11,4 +11,8 @@ public sealed class VehicleDto
     public string Model { get; set; } = string.Empty;
 
     public bool Status { get; set; }
+
+    public Guid? ActiveUserId { get; set; }
+
+    public DateTime? ActiveUsageStartTime { get; set; }
 }

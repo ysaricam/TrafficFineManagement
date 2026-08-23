@@ -1,0 +1,272 @@
+@model VehicleListViewModel
+@{
+    ViewData["Title"] = "Araçlar";
+}
+
+<section class="hero">
+    <div>
+        <p class="eyebrow">Filo görünümü</p>
+        <h1>Araçlar</h1>
+        <p class="hero-copy">
+            Kayıtlı araçların uygunluk durumunu ve temel bilgilerini tek ekrandan izleyin.
+        </p>
+    </div>
+    <div class="live-indicator">
+        <span aria-hidden="true"></span>
+        Dapper read model
+    </div>
+</section>
+
+@if (TempData["Success"] is string successMessage)
+{
+    <div class="flash flash-success" role="status">
+        <span aria-hidden="true">✓</span>
+        @successMessage
+    </div>
+}
+
+@if (TempData["Error"] is string errorMessage)
+{
+    <div class="flash flash-error" role="alert">
+        <span aria-hidden="true">!</span>
+        @errorMessage
+    </div>
+}
+
+<section class="metrics" aria-label="Araç özeti">
+    <article class="metric-card metric-total">
+        <span class="metric-label">Toplam araç</span>
+        <strong>@Model.TotalCount</strong>
+        <small>Filo envanteri</small>
+    </article>
+    <article class="metric-card metric-available">
+        <span class="metric-label">Müsait</span>
+        <strong>@Model.AvailableCount</strong>
+        <small>Atama bekliyor</small>
+    </article>
+    <article class="metric-card metric-active">
+        <span class="metric-label">Kullanımda</span>
+        <strong>@Model.InUseCount</strong>
+        <small>Aktif kullanıcı bağlı</small>
+    </article>
+</section>
+
+<section class="vehicle-panel">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">Güncel envanter</p>
+            <h2>Araç listesi</h2>
+        </div>
+        <div class="panel-actions">
+            <span class="record-count">@Model.TotalCount kayıt</span>
+            <button class="button button-primary button-small"
+                    type="button"
+                    data-dialog-open="create-vehicle-dialog">
+                + Yeni araç
+            </button>
+        </div>
+    </div>
+
+    @if (Model.Vehicles.Count == 0)
+    {
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">◇</span>
+            <h3>Henüz araç bulunmuyor</h3>
+            <p>API üzerinden ilk araç kaydı oluşturulduğunda burada görünecek.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Plaka</th>
+                        <th>Araç</th>
+                        <th>Durum</th>
+                        <th class="action-column"><span class="sr-only">İşlem</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var vehicle in Model.Vehicles)
+                    {
+                        <tr>
+                            <td data-label="Plaka">
+                                <span class="plate">@vehicle.Plaka</span>
+                            </td>
+                            <td data-label="Araç">
+                                <strong class="vehicle-name">@vehicle.Brand @vehicle.Model</strong>
+                                <span class="vehicle-id">@vehicle.Id</span>
+                            </td>
+                            <td data-label="Durum">
+                                <div class="status-stack">
+                                    @if (vehicle.Status)
+                                    {
+                                        <span class="status status-active"><i></i>Kullanımda</span>
+                                        <button class="status-command status-command-complete"
+                                                type="button"
+                                                data-dialog-open="complete-usage-dialog"
+                                                data-vehicle-id="@vehicle.Id"
+                                                data-user-id="@vehicle.ActiveUserId"
+                                                data-vehicle-label="@vehicle.Plaka · @vehicle.Brand @vehicle.Model"
+                                                data-user-label="@vehicle.ActiveUserId">
+                                            Kullanımı tamamla
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="status status-available"><i></i>Müsait</span>
+                                        <button class="status-command status-command-assign"
+                                                type="button"
+                                                data-dialog-open="assign-user-dialog"
+                                                data-vehicle-id="@vehicle.Id"
+                                                data-vehicle-label="@vehicle.Plaka · @vehicle.Brand @vehicle.Model">
+                                            Kullanıcı ata
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                            <td class="action-column">
+                                <a class="detail-link" href="/api/vehicles/@vehicle.Id" aria-label="@vehicle.Plaka API detayını aç">
+                                    API detayı <span aria-hidden="true">↗</span>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<dialog class="command-dialog" id="create-vehicle-dialog" aria-labelledby="create-vehicle-title">
+    <div class="dialog-card">
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Pencereyi kapat">×</button>
+        <p class="eyebrow">Vehicle command</p>
+        <h2 id="create-vehicle-title">Yeni araç ekle</h2>
+        <p class="dialog-copy">Araç bilgileri kaydedildiğinde liste ve özet kartları otomatik güncellenir.</p>
+
+        <form asp-action="CreateVehicle" method="post" class="command-form">
+            <label>
+                <span>Plaka</span>
+                <input name="Plaka" autocomplete="off" placeholder="34 TFM 2026" required />
+            </label>
+            <div class="field-row">
+                <label>
+                    <span>Marka</span>
+                    <input name="Brand" autocomplete="organization" placeholder="Toyota" required />
+                </label>
+                <label>
+                    <span>Model</span>
+                    <input name="Model" autocomplete="off" placeholder="Corolla" required />
+                </label>
+            </div>
+            <div class="dialog-actions">
+                <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
+                <button class="button button-primary" type="submit">Aracı oluştur</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="command-dialog" id="assign-user-dialog" aria-labelledby="assign-user-title">
+    <div class="dialog-card">
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Pencereyi kapat">×</button>
+        <p class="eyebrow">User ilişkisi</p>
+        <h2 id="assign-user-title">Kullanıcı ata</h2>
+        <p class="dialog-copy selected-vehicle-label" id="assign-vehicle-label"></p>
+
+        <form asp-action="AssignUser" method="post" class="command-form">
+            <input id="assign-vehicle-id" type="hidden" name="VehicleId" />
+            <label>
+                <span>Kullanıcı</span>
+                <select name="UserId" required>
+                    <option value="">Kullanıcı seçin</option>
+                    @foreach (var user in Model.Users)
+                    {
+                        <option value="@user.Id">@user.Id</option>
+                    }
+                </select>
+            </label>
+            <label>
+                <span>Başlangıç zamanı <small>UTC</small></span>
+                <input name="StartTime"
+                       type="datetime-local"
+                       max="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")"
+                       value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" />
+            </label>
+            <div class="dialog-actions">
+                <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
+                <button class="button button-primary" type="submit" disabled="@(Model.Users.Count == 0)">
+                    Kullanıcıyı ata
+                </button>
+            </div>
+        </form>
+
+        <div class="dialog-divider"><span>veya</span></div>
+        <form asp-action="CreateUser" method="post" class="inline-user-create">
+            <div>
+                <strong>Yeni kullanıcı gerekiyor mu?</strong>
+                <span>Sistem otomatik bir kullanıcı kimliği üretir.</span>
+            </div>
+            <button class="button button-secondary button-small" type="submit">+ Kullanıcı oluştur</button>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="command-dialog" id="complete-usage-dialog" aria-labelledby="complete-usage-title">
+    <div class="dialog-card dialog-card-compact">
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Pencereyi kapat">×</button>
+        <p class="eyebrow">Aktif kullanım</p>
+        <h2 id="complete-usage-title">Kullanımı tamamla</h2>
+        <p class="dialog-copy selected-vehicle-label" id="complete-vehicle-label"></p>
+        <div class="relationship-summary">
+            <span>Aktif kullanıcı</span>
+            <strong id="complete-user-label"></strong>
+        </div>
+        <p class="dialog-warning">Araç tekrar müsait duruma geçecek ve bitiş zamanı şimdi olarak kaydedilecek.</p>
+
+        <form asp-action="CompleteUsage" method="post">
+            <input id="complete-vehicle-id" type="hidden" name="vehicleId" />
+            <input id="complete-user-id" type="hidden" name="userId" />
+            <div class="dialog-actions">
+                <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
+                <button class="button button-danger" type="submit">Kullanımı tamamla</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+    document.querySelectorAll('[data-dialog-open]').forEach(button => {
+        button.addEventListener('click', () => {
+            const dialog = document.getElementById(button.dataset.dialogOpen);
+
+            if (dialog.id === 'assign-user-dialog') {
+                document.getElementById('assign-vehicle-id').value = button.dataset.vehicleId;
+                document.getElementById('assign-vehicle-label').textContent = button.dataset.vehicleLabel;
+            }
+
+            if (dialog.id === 'complete-usage-dialog') {
+                document.getElementById('complete-vehicle-id').value = button.dataset.vehicleId;
+                document.getElementById('complete-user-id').value = button.dataset.userId;
+                document.getElementById('complete-vehicle-label').textContent = button.dataset.vehicleLabel;
+                document.getElementById('complete-user-label').textContent = button.dataset.userLabel;
+            }
+
+            dialog.showModal();
+        });
+    });
+
+    document.querySelectorAll('[data-dialog-close]').forEach(button => {
+        button.addEventListener('click', () => button.closest('dialog').close());
+    });
+
+    document.querySelectorAll('dialog').forEach(dialog => {
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+    });
+</script>

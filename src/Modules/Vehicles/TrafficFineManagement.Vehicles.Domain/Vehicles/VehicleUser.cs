@@ -1,5 +1,6 @@
 using TrafficFineManagement.BuildingBlocks.Domain;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
+using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles.Rules;
 
 namespace TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
@@ -27,7 +28,13 @@ public class VehicleUser : Entity
 
     internal void Complete(DateTime endTime)
     {
-        _endTime = NormalizeToUtc(endTime);
+        var normalizedEndTime = NormalizeToUtc(endTime);
+
+        CheckRule(new VehicleUsageEndTimeMustNotPrecedeStartTimeRule(
+            _startTime,
+            normalizedEndTime));
+
+        _endTime = normalizedEndTime;
     }
 
     private static DateTime NormalizeToUtc(DateTime value)

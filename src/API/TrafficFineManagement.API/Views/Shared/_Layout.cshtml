@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>@ViewData["Title"] · Trafik Yönetimi</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="/vehicles" aria-label="Araç yönetimi ana sayfası">
+            <span class="brand-mark" aria-hidden="true">TF</span>
+            <span>
+                <strong>Trafik Yönetimi</strong>
+                <small>Operasyon Merkezi</small>
+            </span>
+        </a>
+        <nav aria-label="Ana navigasyon">
+            <a class="nav-link active" href="/vehicles">Araçlar</a>
+            <a class="nav-link" href="/health">Sistem</a>
+        </nav>
+    </header>
+
+    <main class="page-shell">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <span>Traffic Fine Management</span>
+        <span>Vehicle Read Model</span>
+    </footer>
+</body>
+</html>
