@@ -4,6 +4,22 @@ Traffic Fine Management; araçları, şoför atamalarını ve trafik cezaların�
 
 Proje ilk kez Development ortamında çalıştırıldığında veritabanı migration'ları ve demo verileri otomatik oluşturulur. Böylece uygulamayı açan biri farklı rollerle giriş yaparak bütün iş akışlarını doğrudan deneyebilir.
 
+## Canlı demo
+
+Uygulamanın sunucuya kurulmuş sürümüne aşağıdaki adresten erişilebilir:
+
+- Giriş ekranı: [https://traffic.wordlope.com/login](https://traffic.wordlope.com/login)
+
+Kontrol amacıyla seed edilen hesapların ortak parolası:
+
+```text
+qvvSRLXcXoAxKYhcfrYd49AdqnEcB7LE
+```
+
+Örneğin bütün özellikleri incelemek için `admin` kullanıcı adıyla giriş yapılabilir. Diğer kullanıcı adları ve rol bilgileri [Seed kullanıcıları](#seed-kullanıcıları) bölümünde listelenmiştir.
+
+> Canlı ortam yalnızca demo ve değerlendirme amaçlıdır. Giriş bilgileri herkese açık olduğundan gerçek veya hassas veri kullanılmamalıdır.
+
 ## Temel özellikler
 
 - Cookie tabanlı kullanıcı girişi ve rol bazlı yetkilendirme
