@@ -1,0 +1,348 @@
+@model FineListViewModel
+@{
+    ViewData["Title"] = "Trafik Cezaları";
+}
+
+<section class="hero">
+    <div>
+        <p class="eyebrow">Onay merkezi</p>
+        <h1>Trafik cezaları</h1>
+        <p class="hero-copy">
+            Ceza kayıtlarını, onay aşamalarını ve işlem geçmişini tek ekrandan yönetin.
+        </p>
+    </div>
+    <div class="live-indicator">
+        <span aria-hidden="true"></span>
+        Dapper read model
+    </div>
+</section>
+
+@if (TempData["Success"] is string successMessage)
+{
+    <div class="flash flash-success" role="status"><span>✓</span>@successMessage</div>
+}
+@if (TempData["Error"] is string errorMessage)
+{
+    <div class="flash flash-error" role="alert"><span>!</span>@errorMessage</div>
+}
+
+<section class="metrics fine-metrics" aria-label="Ceza özeti">
+    <article class="metric-card metric-total">
+        <span class="metric-label">Toplam ceza</span>
+        <strong>@Model.TotalCount</strong>
+        <small>Tüm kayıtlar</small>
+    </article>
+    <article class="metric-card metric-active">
+        <span class="metric-label">Aktif süreç</span>
+        <strong>@Model.ActiveCount</strong>
+        <small>İşlem bekleyen</small>
+    </article>
+    <article class="metric-card metric-available">
+        <span class="metric-label">Tamamlanan</span>
+        <strong>@Model.CompletedCount</strong>
+        <small>Finans süreci kapandı</small>
+    </article>
+    <article class="metric-card metric-rejected">
+        <span class="metric-label">Reddedilen</span>
+        <strong>@Model.RejectedCount</strong>
+        <small>Pasif kayıt</small>
+    </article>
+</section>
+
+<section class="vehicle-panel fine-panel">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">Güncel kayıtlar</p>
+            <h2>Ceza listesi</h2>
+        </div>
+        <div class="panel-actions">
+            <span class="record-count">@Model.TotalCount kayıt</span>
+            <button class="button button-primary button-small" type="button"
+                    data-dialog-open="create-fine-dialog">+ Yeni ceza</button>
+        </div>
+    </div>
+
+    @if (Model.Fines.Count == 0)
+    {
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">◇</span>
+            <h3>Henüz ceza kaydı bulunmuyor</h3>
+            <p>İlk trafik cezasını sağ üstteki butondan oluşturabilirsiniz.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>İhlal</th>
+                        <th>Araç ve kullanıcı</th>
+                        <th>Tutar</th>
+                        <th>Durum</th>
+                        <th class="action-column"><span class="sr-only">İşlem</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var fine in Model.Fines)
+                {
+                    var fineLabel = $"{fine.ViolationCode} · {Model.GetVehicleLabel(fine.VehicleId)}";
+                    <tr>
+                        <td data-label="İhlal">
+                            <span class="fine-code">@fine.ViolationCode</span>
+                            <strong class="fine-reason">@fine.Reason</strong>
+                            <span class="vehicle-id">@fine.FineDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                        </td>
+                        <td data-label="Araç ve kullanıcı">
+                            <strong class="vehicle-name">@Model.GetVehicleLabel(fine.VehicleId)</strong>
+                            <span class="vehicle-id">Kullanıcı · @fine.FinedUserId</span>
+                        </td>
+                        <td data-label="Tutar">
+                            <strong class="fine-amount">@fine.Amount.ToString("N2") @fine.Currency</strong>
+                        </td>
+                        <td data-label="Durum">
+                            <div class="status-stack">
+                                <span class="status @(fine.Status == FineStatus.Active ? "status-active" : "status-passive")">
+                                    <i></i>@FineListViewModel.GetActionLabel(fine.CurrentAction)
+                                </span>
+                                @if (fine.Status == FineStatus.Active)
+                                {
+                                    <div class="fine-inline-actions">
+                                        @if (fine.CurrentAction == FineActionType.Created)
+                                        {
+                                            <button type="button" class="status-command status-command-assign"
+                                                    data-fine-action="manager-approve"
+                                                    data-fine-id="@fine.Id" data-fine-label="@fineLabel"
+                                                    data-action-title="Yönetici onayı">Yönetici onayı</button>
+                                        }
+                                        else if (fine.CurrentAction == FineActionType.ManagerApproved)
+                                        {
+                                            <button type="button" class="status-command status-command-assign"
+                                                    data-fine-action="finance-approve"
+                                                    data-fine-id="@fine.Id" data-fine-label="@fineLabel"
+                                                    data-action-title="Finans onayı">Finans onayı</button>
+                                        }
+                                        else if (fine.CurrentAction == FineActionType.FinanceApproved)
+                                        {
+                                            <button type="button" class="status-command status-command-complete"
+                                                    data-fine-action="complete"
+                                                    data-fine-id="@fine.Id" data-fine-label="@fineLabel"
+                                                    data-action-title="Süreci tamamla">Tamamla</button>
+                                        }
+                                        <button type="button" class="status-command status-command-reject"
+                                                data-reject-fine data-fine-id="@fine.Id"
+                                                data-fine-label="@fineLabel">Reddet</button>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                        <td class="action-column">
+                            <button class="detail-link detail-button" type="button"
+                                    data-history-fine data-fine-id="@fine.Id"
+                                    data-fine-label="@fineLabel">Geçmiş <span>↗</span></button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<dialog class="command-dialog" id="create-fine-dialog" aria-labelledby="create-fine-title">
+    <div class="dialog-card">
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Pencereyi kapat">×</button>
+        <p class="eyebrow">Fine command</p>
+        <h2 id="create-fine-title">Yeni ceza oluştur</h2>
+        <p class="dialog-copy">Araç, ceza yiyen kullanıcı ve işlemi yapan kullanıcı birlikte kaydedilir.</p>
+
+        <form asp-action="Create" method="post" class="command-form">
+            <label>
+                <span>Araç</span>
+                <select id="fine-vehicle-select" name="VehicleId" required>
+                    <option value="">Araç seçin</option>
+                    @foreach (var vehicle in Model.Vehicles)
+                    {
+                        <option value="@vehicle.Id" data-active-user-id="@vehicle.ActiveUserId">
+                            @vehicle.Plaka · @vehicle.Brand @vehicle.Model
+                        </option>
+                    }
+                </select>
+            </label>
+            <div class="field-row">
+                <label>
+                    <span>Ceza yiyen kullanıcı</span>
+                    <select id="fined-user-select" name="FinedUserId" required>
+                        <option value="">Kullanıcı seçin</option>
+                        @foreach (var user in Model.Users)
+                        {
+                            <option value="@user.Id">@user.Id</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>İşlemi yapan kullanıcı</span>
+                    <select name="CreatedByUserId" required>
+                        <option value="">Kullanıcı seçin</option>
+                        @foreach (var user in Model.Users)
+                        {
+                            <option value="@user.Id">@user.Id</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <div class="field-row">
+                <label><span>İhlal kodu</span><input name="ViolationCode" maxlength="50" required placeholder="HIZ-001" /></label>
+                <label><span>Ceza tarihi <small>UTC</small></span><input name="FineDate" type="datetime-local" value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" required /></label>
+            </div>
+            <label><span>Ceza nedeni</span><textarea name="Reason" maxlength="1000" required placeholder="İhlalin kısa açıklaması"></textarea></label>
+            <div class="field-row amount-fields">
+                <label><span>Tutar</span><input name="Amount" type="number" min="0.01" step="0.01" required placeholder="1500,00" /></label>
+                <label><span>Para birimi</span><input name="Currency" maxlength="3" value="TRY" required /></label>
+            </div>
+            <div class="dialog-actions">
+                <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
+                <button class="button button-primary" type="submit" disabled="@(Model.Users.Count == 0 || Model.Vehicles.Count == 0)">Cezayı oluştur</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="command-dialog" id="fine-action-dialog" aria-labelledby="fine-action-title">
+    <div class="dialog-card dialog-card-compact">
+        <button class="dialog-close" type="button" data-dialog-close>×</button>
+        <p class="eyebrow">Onay işlemi</p>
+        <h2 id="fine-action-title">Ceza işlemi</h2>
+        <p class="dialog-copy selected-vehicle-label" id="fine-action-label"></p>
+        <form id="fine-action-form" method="post" class="command-form">
+            @Html.AntiForgeryToken()
+            <input id="fine-action-id" type="hidden" name="FineId" />
+            <label>
+                <span>İşlemi yapan kullanıcı</span>
+                <select name="PerformedByUserId" required>
+                    <option value="">Kullanıcı seçin</option>
+                    @foreach (var user in Model.Users) { <option value="@user.Id">@user.Id</option> }
+                </select>
+            </label>
+            <label><span>Açıklama</span><textarea name="Description" maxlength="1000" placeholder="İsteğe bağlı açıklama"></textarea></label>
+            <div class="dialog-actions">
+                <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
+                <button class="button button-primary" type="submit">İşlemi onayla</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="command-dialog" id="reject-fine-dialog" aria-labelledby="reject-fine-title">
+    <div class="dialog-card dialog-card-compact">
+        <button class="dialog-close" type="button" data-dialog-close>×</button>
+        <p class="eyebrow">Ret işlemi</p>
+        <h2 id="reject-fine-title">Cezayı reddet</h2>
+        <p class="dialog-copy selected-vehicle-label" id="reject-fine-label"></p>
+        <form asp-action="Reject" method="post" class="command-form">
+            <input id="reject-fine-id" type="hidden" name="FineId" />
+            <label>
+                <span>İşlemi yapan kullanıcı</span>
+                <select name="PerformedByUserId" required>
+                    <option value="">Kullanıcı seçin</option>
+                    @foreach (var user in Model.Users) { <option value="@user.Id">@user.Id</option> }
+                </select>
+            </label>
+            <label><span>Ret nedeni</span><textarea name="RejectionReason" maxlength="1000" required placeholder="Ret nedenini açıklayın"></textarea></label>
+            <p class="dialog-warning">Bu işlem cezayı pasif duruma getirir ve geri alınamaz.</p>
+            <div class="dialog-actions">
+                <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
+                <button class="button button-danger" type="submit">Cezayı reddet</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="command-dialog history-dialog" id="fine-history-dialog" aria-labelledby="fine-history-title">
+    <div class="dialog-card">
+        <button class="dialog-close" type="button" data-dialog-close>×</button>
+        <p class="eyebrow">İşlem günlüğü</p>
+        <h2 id="fine-history-title">Ceza geçmişi</h2>
+        <p class="dialog-copy selected-vehicle-label" id="history-fine-label"></p>
+        <div id="fine-history-content" class="history-list" aria-live="polite"></div>
+    </div>
+</dialog>
+
+<script>
+    const actionRoutes = {
+        'manager-approve': '/traffic-fines/manager-approve',
+        'finance-approve': '/traffic-fines/finance-approve',
+        'complete': '/traffic-fines/complete'
+    };
+    const actionLabels = ['Oluşturuldu', 'Yönetici onayladı', 'Finans onayladı', 'Reddedildi', 'Tamamlandı'];
+    const statusLabels = ['Aktif', 'Pasif'];
+
+    document.querySelectorAll('[data-dialog-open]').forEach(button => {
+        button.addEventListener('click', () => document.getElementById(button.dataset.dialogOpen).showModal());
+    });
+
+    document.querySelectorAll('[data-fine-action]').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('fine-action-title').textContent = button.dataset.actionTitle;
+            document.getElementById('fine-action-label').textContent = button.dataset.fineLabel;
+            document.getElementById('fine-action-id').value = button.dataset.fineId;
+            document.getElementById('fine-action-form').action = actionRoutes[button.dataset.fineAction];
+            document.getElementById('fine-action-dialog').showModal();
+        });
+    });
+
+    document.querySelectorAll('[data-reject-fine]').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('reject-fine-id').value = button.dataset.fineId;
+            document.getElementById('reject-fine-label').textContent = button.dataset.fineLabel;
+            document.getElementById('reject-fine-dialog').showModal();
+        });
+    });
+
+    document.querySelectorAll('[data-history-fine]').forEach(button => {
+        button.addEventListener('click', async () => {
+            const dialog = document.getElementById('fine-history-dialog');
+            const content = document.getElementById('fine-history-content');
+            document.getElementById('history-fine-label').textContent = button.dataset.fineLabel;
+            content.innerHTML = '<p class="history-loading">Geçmiş yükleniyor…</p>';
+            dialog.showModal();
+
+            try {
+                const response = await fetch(`/api/traffic-fines/${button.dataset.fineId}`);
+                if (!response.ok) throw new Error('Geçmiş alınamadı.');
+                const fine = await response.json();
+                content.innerHTML = fine.approvalHistory.map(item => `
+                    <article class="history-item">
+                        <span class="history-dot"></span>
+                        <div>
+                            <strong>${actionLabels[item.actionType] ?? item.actionType}</strong>
+                            <span>${new Date(item.actionDate).toLocaleString('tr-TR')}</span>
+                            <code>${item.performedByUserId}</code>
+                            ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
+                            <small>${statusLabels[item.previousStatus]} → ${statusLabels[item.newStatus]}</small>
+                        </div>
+                    </article>`).join('') || '<p class="history-loading">Geçmiş kaydı bulunamadı.</p>';
+            } catch (error) {
+                content.innerHTML = `<p class="history-error">${escapeHtml(error.message)}</p>`;
+            }
+        });
+    });
+
+    document.getElementById('fine-vehicle-select')?.addEventListener('change', event => {
+        const activeUserId = event.target.selectedOptions[0]?.dataset.activeUserId;
+        if (activeUserId) document.getElementById('fined-user-select').value = activeUserId;
+    });
+
+    document.querySelectorAll('[data-dialog-close]').forEach(button => {
+        button.addEventListener('click', () => button.closest('dialog').close());
+    });
+    document.querySelectorAll('dialog').forEach(dialog => {
+        dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    });
+
+    function escapeHtml(value) {
+        const element = document.createElement('div');
+        element.textContent = value;
+        return element.innerHTML;
+    }
+</script>

@@ -1,3 +1,7 @@
+@{
+    var isVehiclesPage = Context.Request.Path.StartsWithSegments("/vehicles");
+    var isTrafficFinesPage = Context.Request.Path.StartsWithSegments("/traffic-fines");
+}
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -17,7 +21,8 @@
             </span>
         </a>
         <nav aria-label="Ana navigasyon">
-            <a class="nav-link active" href="/vehicles">Araçlar</a>
+            <a class="nav-link @(isVehiclesPage ? "active" : null)" href="/vehicles">Araçlar</a>
+            <a class="nav-link @(isTrafficFinesPage ? "active" : null)" href="/traffic-fines">Cezalar</a>
             <a class="nav-link" href="/health">Sistem</a>
         </nav>
     </header>
@@ -28,7 +33,7 @@
 
     <footer class="site-footer">
         <span>Traffic Fine Management</span>
-        <span>Vehicle Read Model</span>
+        <span>Modular Read Models</span>
     </footer>
 </body>
 </html>
