@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Modules\TrafficFine\TrafficFineManagement.TrafficFine.Application\TrafficFineManagement.TrafficFine.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\TrafficFine\TrafficFineManagement.TrafficFine.Infrastructure\TrafficFineManagement.TrafficFine.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Vehicles\TrafficFineManagement.Vehicles.Application\TrafficFineManagement.Vehicles.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Vehicles\TrafficFineManagement.Vehicles.Infrastructure\TrafficFineManagement.Vehicles.Infrastructure.csproj" />
   </ItemGroup>
@@ -9,6 +11,10 @@
     <PackageReference Include="Autofac" Version="9.3.2" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
     <PackageReference Include="MediatR" Version="14.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <PropertyGroup>

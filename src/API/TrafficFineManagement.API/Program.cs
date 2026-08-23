@@ -2,6 +2,8 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FluentValidation;
 using TrafficFineManagement.API.Modules.Vehicles;
+using TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.DataAccess;
+using TrafficFineManagement.Modules.TrafficFine.Infrastructure.Configuration.Processing;
 using TrafficFineManagement.Modules.Vehicles.Infrastructure.Configuration.DataAccess;
 using TrafficFineManagement.Modules.Vehicles.Infrastructure.Configuration.Processing;
 
@@ -20,11 +22,19 @@ builder.Host.ConfigureContainer<ContainerBuilder>(
 
 builder.Services.AddVehiclesProcessing();
 builder.Services.AddVehiclesQuartz();
+builder.Services.AddTrafficFineProcessing();
+builder.Services.AddTrafficFineQuartz();
 
 var vehiclesConnectionString = builder.Configuration.GetConnectionString("VehiclesConnectionString")
     ?? throw new InvalidOperationException("VehiclesConnectionString is not configured.");
 
 builder.Services.AddVehiclesPersistence(vehiclesConnectionString);
+
+var trafficFineConnectionString = builder.Configuration
+    .GetConnectionString("TrafficFineConnectionString")
+    ?? throw new InvalidOperationException("TrafficFineConnectionString is not configured.");
+
+builder.Services.AddTrafficFinePersistence(trafficFineConnectionString);
 
 var app = builder.Build();
 

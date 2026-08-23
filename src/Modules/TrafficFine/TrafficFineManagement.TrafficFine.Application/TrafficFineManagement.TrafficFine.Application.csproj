@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrafficFineManagement.TrafficFine.Domain\TrafficFineManagement.TrafficFine.Domain.csproj" />
+    <ProjectReference Include="..\TrafficFineManagement.TrafficFine.IntegrationEvents\TrafficFineManagement.TrafficFine.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TrafficFineManagement.Application\TrafficFineManagement.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -9,6 +9,12 @@
     <Project Path="src/BuildingBlocks/TrafficFineManagement.Infrastructure/TrafficFineManagement.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/TrafficFine/">
+    <Project Path="src/Modules/TrafficFine/TrafficFineManagement.TrafficFine.Application/TrafficFineManagement.TrafficFine.Application.csproj" />
+    <Project Path="src/Modules/TrafficFine/TrafficFineManagement.TrafficFine.Domain/TrafficFineManagement.TrafficFine.Domain.csproj" />
+    <Project Path="src/Modules/TrafficFine/TrafficFineManagement.TrafficFine.Infrastructure/TrafficFineManagement.TrafficFine.Infrastructure.csproj" />
+    <Project Path="src/Modules/TrafficFine/TrafficFineManagement.TrafficFine.IntegrationEvents/TrafficFineManagement.TrafficFine.IntegrationEvents.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Vehicles/">
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Application/TrafficFineManagement.Vehicles.Application.csproj" />
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Domain/TrafficFineManagement.Vehicles.Domain.csproj" />
