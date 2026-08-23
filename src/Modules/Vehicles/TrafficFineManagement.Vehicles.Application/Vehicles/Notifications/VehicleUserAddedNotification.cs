@@ -8,7 +8,7 @@ public sealed class VehicleUserAddedNotification :
     DomainNotificationBase<VehicleAddUserDomainEvent>
 {
     public VehicleUserAddedNotification(VehicleAddUserDomainEvent domainEvent)
-        : base(domainEvent, domainEvent.Id)
+        : base(domainEvent, domainEvent.Id, domainEvent.OccurredOn)
     {
         VehicleId = domainEvent.VehicleId.Value;
         UserId = domainEvent.UserId.Value;
@@ -20,8 +20,9 @@ public sealed class VehicleUserAddedNotification :
         Guid id,
         Guid vehicleId,
         Guid userId,
-        DateTime startTime)
-        : base(id)
+        DateTime startTime,
+        DateTime occurredOn)
+        : base(id, occurredOn)
     {
         VehicleId = vehicleId;
         UserId = userId;

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\TrafficFineManagement.Application\TrafficFineManagement.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\TrafficFineManagement.Infrastructure\TrafficFineManagement.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

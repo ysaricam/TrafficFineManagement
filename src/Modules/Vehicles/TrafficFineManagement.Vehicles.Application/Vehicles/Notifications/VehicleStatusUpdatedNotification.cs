@@ -8,15 +8,19 @@ public sealed class VehicleStatusUpdatedNotification :
     DomainNotificationBase<VehicleStatusUpdatedDomainEvent>
 {
     public VehicleStatusUpdatedNotification(VehicleStatusUpdatedDomainEvent domainEvent)
-        : base(domainEvent, domainEvent.Id)
+        : base(domainEvent, domainEvent.Id, domainEvent.OccurredOn)
     {
         VehicleId = domainEvent.VehicleId.Value;
         Status = domainEvent.Status;
     }
 
     [JsonConstructor]
-    public VehicleStatusUpdatedNotification(Guid id, Guid vehicleId, bool status)
-        : base(id)
+    public VehicleStatusUpdatedNotification(
+        Guid id,
+        Guid vehicleId,
+        bool status,
+        DateTime occurredOn)
+        : base(id, occurredOn)
     {
         VehicleId = vehicleId;
         Status = status;

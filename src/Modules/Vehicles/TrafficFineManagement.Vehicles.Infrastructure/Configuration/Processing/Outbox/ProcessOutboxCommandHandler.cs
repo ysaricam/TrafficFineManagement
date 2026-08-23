@@ -2,6 +2,7 @@ using Dapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TrafficFineManagement.BuildingBlocks.Application.Data;
 using TrafficFineManagement.BuildingBlocks.Application.Events;
 using TrafficFineManagement.BuildingBlocks.Infrastructure.DomainEventsDispatching;
@@ -39,7 +40,8 @@ public sealed class ProcessOutboxCommandHandler :
             SELECT
                 "Id",
                 "Type",
-                "Data"
+                "Data",
+                "OccurredOn"
             FROM vehicles."OutboxMessages"
             WHERE "ProcessedDate" IS NULL
             ORDER BY "OccurredOn"
@@ -62,8 +64,12 @@ public sealed class ProcessOutboxCommandHandler :
                 ?? throw new InvalidOperationException(
                     $"Domain notification type '{message.Type}' is not mapped.");
 
+            var notificationData = JObject.Parse(message.Data);
+            notificationData[nameof(IDomainEventNotification.OccurredOn)] ??=
+                message.OccurredOn;
+
             var notification = JsonConvert.DeserializeObject(
-                    message.Data,
+                    notificationData.ToString(Formatting.None),
                     notificationType)
                 as IDomainEventNotification
                 ?? throw new InvalidOperationException(

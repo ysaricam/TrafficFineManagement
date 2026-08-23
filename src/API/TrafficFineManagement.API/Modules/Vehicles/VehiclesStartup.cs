@@ -11,6 +11,7 @@ public static class VehiclesStartup
     {
         builder.RegisterModule(new VehiclesAutofacModule());
         builder.RegisterModule(new OutboxModule());
+        builder.RegisterModule(new EventsBusModule());
 
         var domainNotificationsMap = new BiDictionary<string, Type>();
 

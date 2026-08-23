@@ -10,4 +10,6 @@ public interface IDomainEventNotification<out TEventType> : IDomainEventNotifica
 public interface IDomainEventNotification : INotification
 {
     Guid Id { get; }
+
+    DateTime OccurredOn { get; }
 }

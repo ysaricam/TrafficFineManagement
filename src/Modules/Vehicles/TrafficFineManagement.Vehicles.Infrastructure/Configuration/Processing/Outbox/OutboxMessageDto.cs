@@ -7,4 +7,6 @@ public sealed class OutboxMessageDto
     public string Type { get; init; } = string.Empty;
 
     public string Data { get; init; } = string.Empty;
+
+    public DateTime OccurredOn { get; init; }
 }
