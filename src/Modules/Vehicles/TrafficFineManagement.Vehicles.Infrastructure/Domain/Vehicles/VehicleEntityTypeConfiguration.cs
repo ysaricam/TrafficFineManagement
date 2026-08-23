@@ -31,6 +31,10 @@ internal sealed class VehicleEntityTypeConfiguration : IEntityTypeConfiguration<
         {
             user.WithOwner().HasForeignKey("VehicleId");
             user.ToTable("VehicleUsers", "vehicles");
+            user.Property(x => x.Id)
+                .HasField("_id")
+                .HasColumnName("Id")
+                .ValueGeneratedNever();
             user.Property(x => x.UserId).HasColumnName("UserId");
             user.Property(x => x.StartTime)
                 .HasField("_startTime")
@@ -38,7 +42,8 @@ internal sealed class VehicleEntityTypeConfiguration : IEntityTypeConfiguration<
             user.Property(x => x.EndTime)
                 .HasField("_endTime")
                 .HasColumnName("EndTime");
-            user.HasKey("VehicleId", nameof(VehicleUser.UserId));
+            user.HasKey("VehicleId", nameof(VehicleUser.Id));
+            user.HasIndex("VehicleId", nameof(VehicleUser.UserId));
         });
     }
 }

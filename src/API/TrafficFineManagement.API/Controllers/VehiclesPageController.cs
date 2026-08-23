@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using TrafficFineManagement.API.Infrastructure.Time;
 using TrafficFineManagement.API.Models.Vehicles;
+using TrafficFineManagement.API.Models.Users;
+using TrafficFineManagement.Modules.Users.Application.Contracts;
+using TrafficFineManagement.Modules.Users.Application.Users.CreateUser;
+using TrafficFineManagement.Modules.Users.Application.Users.GetAllUsers;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
-using TrafficFineManagement.Modules.Vehicles.Application.Users.CreateUser;
-using TrafficFineManagement.Modules.Vehicles.Application.Users.GetAllUsers;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.CompleteVehicleUsage;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
@@ -11,13 +15,18 @@ using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.Vehicle;
 namespace TrafficFineManagement.API.Controllers;
 
 [Route("vehicles")]
+[Authorize]
 public sealed class VehiclesPageController : Controller
 {
     private readonly IVehiclesModule _vehiclesModule;
+    private readonly IUsersModule _usersModule;
 
-    public VehiclesPageController(IVehiclesModule vehiclesModule)
+    public VehiclesPageController(
+        IVehiclesModule vehiclesModule,
+        IUsersModule usersModule)
     {
         _vehiclesModule = vehiclesModule;
+        _usersModule = usersModule;
     }
 
     [HttpGet]
@@ -26,7 +35,7 @@ public sealed class VehiclesPageController : Controller
         var vehicles = await _vehiclesModule.ExecuteQueryAsync(
             new GetAllVehiclesQuery(),
             cancellationToken);
-        var users = await _vehiclesModule.ExecuteQueryAsync(
+        var users = await _usersModule.ExecuteQueryAsync(
             new GetAllUsersQuery(),
             cancellationToken);
 
@@ -36,6 +45,7 @@ public sealed class VehiclesPageController : Controller
     }
 
     [HttpPost("create")]
+    [Authorize(Roles = "Manager,Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateVehicle(
         CreateVehicleInputModel input,
@@ -58,14 +68,25 @@ public sealed class VehiclesPageController : Controller
     }
 
     [HttpPost("users/create")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateUser(
+        CreateUserInputModel input,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.NewGuid();
+        if (!ModelState.IsValid)
+        {
+            TempData["Error"] = "Kullanıcı bilgileri eksik veya geçersiz.";
+            return RedirectToAction(nameof(Index));
+        }
 
-        await _vehiclesModule.ExecuteCommandAsync(
-            new CreateUserCommand(userId),
+        var userId = await _usersModule.ExecuteCommandAsync(
+            new CreateUserCommand(
+                input.Name,
+                input.Surname,
+                input.Username,
+                input.Password,
+                input.Role),
             cancellationToken);
 
         TempData["Success"] = $"Yeni kullanıcı oluşturuldu: {userId}";
@@ -74,19 +95,24 @@ public sealed class VehiclesPageController : Controller
     }
 
     [HttpPost("users/assign")]
+    [Authorize(Roles = "Manager,Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AssignUser(
         AssignVehicleUserInputModel input,
         CancellationToken cancellationToken)
     {
-        if (input.VehicleId == Guid.Empty || input.UserId == Guid.Empty)
+        if (!ModelState.IsValid ||
+            input.VehicleId == Guid.Empty ||
+            input.UserId == Guid.Empty)
         {
             TempData["Error"] = "Araç ve kullanıcı seçimi zorunludur.";
             return RedirectToAction(nameof(Index));
         }
 
         var startTime = input.StartTime.HasValue
-            ? DateTime.SpecifyKind(input.StartTime.Value, DateTimeKind.Utc)
+            ? BrowserLocalTime.ToUtc(
+                input.StartTime.Value,
+                input.TimeZoneOffsetMinutes)
             : DateTime.UtcNow;
 
         if (startTime > DateTime.UtcNow.AddMinutes(1))
@@ -108,6 +134,7 @@ public sealed class VehiclesPageController : Controller
     }
 
     [HttpPost("users/complete")]
+    [Authorize(Roles = "Manager,Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CompleteUsage(
         Guid vehicleId,

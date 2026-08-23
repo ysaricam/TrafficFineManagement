@@ -27,10 +27,19 @@ public sealed class ApproveFineByFinanceCommandHandler :
             ?? throw new KeyNotFoundException($"Fine '{request.FineId}' was not found.");
 
         var performedByUserId = new UserId(request.PerformedByUserId);
-        if (await _userRepository.GetByIdAsync(performedByUserId, cancellationToken) is null)
+        var performingUser = await _userRepository.GetByIdAsync(
+            performedByUserId,
+            cancellationToken);
+        if (performingUser is null)
         {
             throw new KeyNotFoundException(
                 $"Performing user '{request.PerformedByUserId}' was not found.");
+        }
+
+        if (!performingUser.IsInRole(UserRole.Finance, UserRole.Admin))
+        {
+            throw new UnauthorizedAccessException(
+                "Only a finance user or administrator can approve this step.");
         }
 
         fine.ApproveByFinance(performedByUserId, request.Description);

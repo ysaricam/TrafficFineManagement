@@ -1,4 +1,3 @@
-using TrafficFineManagement.Modules.Vehicles.Domain.Users.Events;
 using TrafficFineManagement.BuildingBlocks.Domain;
 
 namespace TrafficFineManagement.Modules.Vehicles.Domain.Users;
@@ -6,18 +5,20 @@ namespace TrafficFineManagement.Modules.Vehicles.Domain.Users;
 public class User : Entity, IAggregateRoot
 {
     public UserId Id { get; private set; } = null!;
+    private UserRole _role;
+
+    public UserRole Role => _role;
 
     private User() { }
 
-    public static User Create(Guid id)
+    public static User Create(Guid id, UserRole role)
     {
-        return new User(id);
+        return new User(id, role);
     }
 
-    private User(Guid id)
+    private User(Guid id, UserRole role)
     {
         Id = new UserId(id);
-
-        AddDomainEvent(new UserCreatedDomainEvent(Id));
+        _role = role;
     }
 }

@@ -7,9 +7,6 @@ public sealed class FineActionInputModel
     [Required]
     public Guid FineId { get; init; }
 
-    [Required]
-    public Guid PerformedByUserId { get; init; }
-
     [StringLength(1000)]
     public string? Description { get; init; }
 }

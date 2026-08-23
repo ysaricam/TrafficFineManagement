@@ -157,6 +157,7 @@ public sealed class Fine : Entity, IAggregateRoot
         string rejectionReason)
     {
         CheckRule(new FineMustBeActiveRule(_status));
+        CheckRule(new FineCanOnlyBeRejectedDuringApprovalRule(_currentAction));
         CheckRule(new FineRejectionReasonMustBeProvidedRule(rejectionReason));
 
         RecordAction(

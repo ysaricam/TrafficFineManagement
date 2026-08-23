@@ -1,0 +1,261 @@
+@model TrafficFineManagement.API.Models.Authentication.LoginInputModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Giriş";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Giriş · Trafik Yönetimi</title>
+    <style>
+        :root {
+            --ink: #18231f;
+            --muted: #6d7873;
+            --forest: #173f34;
+            --forest-hover: #0f3027;
+            --paper: #f4f2ec;
+            --surface: #fffdf9;
+            --danger: #a84035;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { min-height: 100%; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 32px 20px;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 12% 14%, rgba(31, 122, 85, 0.12), transparent 28rem),
+                radial-gradient(circle at 88% 86%, rgba(185, 105, 32, 0.11), transparent 25rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .login-shell { width: min(100%, 430px); }
+
+        .brand {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 11px;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            color: #fff;
+            background: var(--forest);
+            font-size: 12px;
+            font-weight: 850;
+            letter-spacing: 0.08em;
+            box-shadow: 0 9px 24px rgba(23, 63, 52, 0.2);
+        }
+
+        .brand-copy strong, .brand-copy span { display: block; }
+
+        .brand-copy strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .brand-copy span {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .login-card {
+            padding: 38px;
+            border: 1px solid rgba(222, 223, 217, 0.9);
+            border-radius: 24px;
+            background: rgba(255, 253, 249, 0.96);
+            box-shadow: 0 24px 70px rgba(31, 43, 38, 0.11);
+        }
+
+        .login-card h1 {
+            margin: 0 0 9px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: -0.035em;
+        }
+
+        .login-intro {
+            margin: 0 0 30px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .login-form { display: grid; gap: 18px; }
+
+        .field-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #44504b;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .input-wrap { position: relative; display: block; }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            width: 18px;
+            height: 18px;
+            color: #8a948f;
+            pointer-events: none;
+            transform: translateY(-50%);
+        }
+
+        input {
+            width: 100%;
+            height: 50px;
+            padding: 0 15px 0 44px;
+            border: 1px solid #d5d8d3;
+            border-radius: 12px;
+            outline: none;
+            color: var(--ink);
+            background: #fff;
+            font: inherit;
+            font-size: 14px;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        input::placeholder { color: #a2aaa6; }
+
+        input:focus {
+            border-color: #2d795d;
+            box-shadow: 0 0 0 4px rgba(31, 122, 85, 0.11);
+        }
+
+        .login-button {
+            width: 100%;
+            height: 50px;
+            margin-top: 5px;
+            border: 0;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #fff;
+            background: var(--forest);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 10px 24px rgba(23, 63, 52, 0.2);
+            transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+        }
+
+        .login-button:hover {
+            background: var(--forest-hover);
+            box-shadow: 0 12px 28px rgba(23, 63, 52, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .login-button:active { transform: translateY(0); }
+
+        .validation-summary-errors {
+            padding: 12px 14px;
+            border: 1px solid rgba(168, 64, 53, 0.22);
+            border-radius: 11px;
+            color: var(--danger);
+            background: #f9e8e5;
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 1.45;
+        }
+
+        .validation-summary-errors ul { margin: 0; padding-left: 18px; }
+
+        .field-validation-error {
+            display: block;
+            margin-top: 6px;
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .input-validation-error { border-color: rgba(168, 64, 53, 0.65); }
+
+        .login-footer {
+            margin: 20px 0 0;
+            color: #87908c;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        @@media (max-width: 520px) {
+            body { padding: 24px 16px; }
+            .login-card { padding: 30px 24px; border-radius: 20px; }
+            .login-card h1 { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="login-shell">
+        <div class="brand" aria-label="Trafik Yönetimi">
+            <span class="brand-mark" aria-hidden="true">TF</span>
+            <span class="brand-copy">
+                <strong>Trafik Yönetimi</strong>
+                <span>Operasyon Merkezi</span>
+            </span>
+        </div>
+
+        <section class="login-card">
+            <h1>Hoş geldiniz</h1>
+            <p class="login-intro">Devam etmek için kullanıcı bilgilerinizle giriş yapın.</p>
+
+            <form method="post" action="/login" class="login-form">
+                @Html.AntiForgeryToken()
+                <input asp-for="ReturnUrl" type="hidden" />
+                <div asp-validation-summary="ModelOnly"></div>
+
+                <label>
+                    <span class="field-label">Kullanıcı adı</span>
+                    <span class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <input asp-for="Username" autocomplete="username" placeholder="Kullanıcı adınızı girin" autofocus />
+                    </span>
+                    <span asp-validation-for="Username"></span>
+                </label>
+
+                <label>
+                    <span class="field-label">Parola</span>
+                    <span class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <rect x="4" y="10" width="16" height="11" rx="2" />
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                        </svg>
+                        <input asp-for="Password" type="password" autocomplete="current-password" placeholder="Parolanızı girin" />
+                    </span>
+                    <span asp-validation-for="Password"></span>
+                </label>
+
+                <button class="login-button" type="submit">Giriş yap</button>
+            </form>
+        </section>
+
+        <p class="login-footer">Traffic Fine Management</p>
+    </main>
+</body>
+</html>

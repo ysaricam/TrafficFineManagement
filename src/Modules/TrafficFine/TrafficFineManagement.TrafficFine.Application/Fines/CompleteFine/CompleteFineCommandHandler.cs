@@ -22,10 +22,19 @@ public sealed class CompleteFineCommandHandler : ICommandHandler<CompleteFineCom
             ?? throw new KeyNotFoundException($"Fine '{request.FineId}' was not found.");
 
         var performedByUserId = new UserId(request.PerformedByUserId);
-        if (await _userRepository.GetByIdAsync(performedByUserId, cancellationToken) is null)
+        var performingUser = await _userRepository.GetByIdAsync(
+            performedByUserId,
+            cancellationToken);
+        if (performingUser is null)
         {
             throw new KeyNotFoundException(
                 $"Performing user '{request.PerformedByUserId}' was not found.");
+        }
+
+        if (!performingUser.IsInRole(UserRole.FineOfficer, UserRole.Admin))
+        {
+            throw new UnauthorizedAccessException(
+                "Only a fine officer or administrator can complete a fine.");
         }
 
         fine.Complete(performedByUserId, request.Description);

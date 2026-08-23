@@ -21,9 +21,20 @@
             </span>
         </a>
         <nav aria-label="Ana navigasyon">
-            <a class="nav-link @(isVehiclesPage ? "active" : null)" href="/vehicles">Araçlar</a>
-            <a class="nav-link @(isTrafficFinesPage ? "active" : null)" href="/traffic-fines">Cezalar</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a class="nav-link @(isVehiclesPage ? "active" : null)" href="/vehicles">Araçlar</a>
+                <a class="nav-link @(isTrafficFinesPage ? "active" : null)" href="/traffic-fines">Cezalar</a>
+            }
             <a class="nav-link" href="/health">Sistem</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <span class="nav-link">@User.Identity.Name</span>
+                <form method="post" action="/logout">
+                    @Html.AntiForgeryToken()
+                    <button class="nav-link" type="submit">Çıkış</button>
+                </form>
+            }
         </nav>
     </header>
 

@@ -6,10 +6,12 @@ namespace TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
 public class VehicleUser : Entity
 {
+    private Guid _id;
     public UserId UserId { get; private set; } = null!;
     private DateTime _startTime;
     private DateTime? _endTime;
 
+    public Guid Id => _id;
     public DateTime StartTime => _startTime;
     public DateTime? EndTime => _endTime;
 
@@ -22,6 +24,7 @@ public class VehicleUser : Entity
 
     private VehicleUser(UserId userId, DateTime startTime)
     {
+        _id = Guid.NewGuid();
         UserId = userId;
         _startTime = NormalizeToUtc(startTime);
     }

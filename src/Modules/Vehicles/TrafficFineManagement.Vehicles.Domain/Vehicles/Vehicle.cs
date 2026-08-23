@@ -63,7 +63,8 @@ public class Vehicle : Entity, IAggregateRoot
 
     public void UpdateStatus(UserId id, DateTime endTime)
     {
-        var user = _users.FirstOrDefault(x => x.UserId == id);
+        var user = _users.FirstOrDefault(x =>
+            x.UserId == id && x.EndTime is null);
 
         if (user is null) return;
 

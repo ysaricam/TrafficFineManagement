@@ -1,22 +1,18 @@
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
-using TrafficFineManagement.Modules.Vehicles.Domain.Users.Events;
 
 namespace TrafficFineManagement.Vehicles.Domain.UnitTests.Users;
 
-public sealed class UserDomainEventsTests
+public sealed class UserProjectionTests
 {
     [Fact]
-    public void Create_ShouldAddUserCreatedDomainEvent()
+    public void Create_ShouldPreserveSourceUserId()
     {
         var userId = Guid.NewGuid();
 
-        var user = User.Create(userId);
+        var user = User.Create(userId, UserRole.Driver);
 
-        var domainEvent = Assert.IsType<UserCreatedDomainEvent>(
-            Assert.Single(user.DomainEvents!));
-
-        Assert.Equal(userId, domainEvent.UserId.Value);
-        Assert.NotEqual(Guid.Empty, domainEvent.Id);
-        Assert.Equal(DateTimeKind.Utc, domainEvent.OccurredOn.Kind);
+        Assert.Equal(userId, user.Id.Value);
+        Assert.Equal(UserRole.Driver, user.Role);
+        Assert.Null(user.DomainEvents);
     }
 }

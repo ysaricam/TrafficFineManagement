@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.CompleteVehicleUsage;
@@ -10,6 +11,7 @@ namespace TrafficFineManagement.API.Modules.Vehicles;
 
 [ApiController]
 [Route("api/vehicles")]
+[Authorize]
 public sealed class VehiclesController : ControllerBase
 {
     private readonly IVehiclesModule _vehiclesModule;
@@ -45,6 +47,7 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(VehicleResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateVehicle(
@@ -62,6 +65,7 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpPost("{vehicleId:guid}/users")]
+    [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -81,6 +85,7 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpPatch("{vehicleId:guid}/users/{userId:guid}/complete")]
+    [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

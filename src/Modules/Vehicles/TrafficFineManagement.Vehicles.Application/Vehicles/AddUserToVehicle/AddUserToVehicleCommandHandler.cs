@@ -1,5 +1,7 @@
+using TrafficFineManagement.BuildingBlocks.Domain;
 using TrafficFineManagement.Modules.Vehicles.Application.Contracts;
 using TrafficFineManagement.Modules.Vehicles.Domain.Users;
+using TrafficFineManagement.Modules.Vehicles.Domain.Users.Rules;
 using TrafficFineManagement.Modules.Vehicles.Domain.Vehicles;
 
 namespace TrafficFineManagement.Modules.Vehicles.Application.Vehicles.AddUserToVehicle;
@@ -37,6 +39,12 @@ public sealed class AddUserToVehicleCommandHandler : ICommandHandler<AddUserToVe
         if (user is null)
         {
             throw new KeyNotFoundException($"User '{request.UserId}' was not found.");
+        }
+
+        if (user.Role != UserRole.Driver)
+        {
+            throw new BusinessRuleValidationException(
+                new OnlyDriverCanBeAssignedToVehicleRule(user.Role));
         }
 
         vehicle.AddUser(user.Id, request.StartTime);

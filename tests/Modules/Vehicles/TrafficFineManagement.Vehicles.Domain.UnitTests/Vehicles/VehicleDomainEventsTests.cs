@@ -83,6 +83,35 @@ public sealed class VehicleDomainEventsTests
     }
 
     [Fact]
+    public void AddUser_AfterCompletedUsage_ShouldAllowSameUserToBeAssignedAgain()
+    {
+        var vehicle = CreateVehicleWithoutDomainEvents();
+        var userId = new UserId(Guid.NewGuid());
+        var firstStartTime = DateTime.UtcNow.AddHours(-2);
+        var firstEndTime = DateTime.UtcNow.AddHours(-1);
+        var secondStartTime = DateTime.UtcNow;
+
+        vehicle.AddUser(userId, firstStartTime);
+        vehicle.UpdateStatus(userId, firstEndTime);
+        vehicle.AddUser(userId, secondStartTime);
+
+        Assert.Collection(
+            vehicle.Users,
+            firstUsage =>
+            {
+                Assert.Equal(firstEndTime, firstUsage.EndTime);
+                Assert.Equal(firstStartTime, firstUsage.StartTime);
+            },
+            secondUsage =>
+            {
+                Assert.Null(secondUsage.EndTime);
+                Assert.Equal(secondStartTime, secondUsage.StartTime);
+            });
+        Assert.NotEqual(vehicle.Users.First().Id, vehicle.Users.Last().Id);
+        Assert.True(vehicle.Status);
+    }
+
+    [Fact]
     public void ClearDomainEvents_ShouldRemoveAllEvents()
     {
         var vehicle = Vehicle.Create("34 TFM 002", "Honda", "Civic");

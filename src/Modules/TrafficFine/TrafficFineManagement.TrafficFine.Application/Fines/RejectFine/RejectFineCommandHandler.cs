@@ -22,10 +22,30 @@ public sealed class RejectFineCommandHandler : ICommandHandler<RejectFineCommand
             ?? throw new KeyNotFoundException($"Fine '{request.FineId}' was not found.");
 
         var performedByUserId = new UserId(request.PerformedByUserId);
-        if (await _userRepository.GetByIdAsync(performedByUserId, cancellationToken) is null)
+        var performingUser = await _userRepository.GetByIdAsync(
+            performedByUserId,
+            cancellationToken);
+        if (performingUser is null)
         {
             throw new KeyNotFoundException(
                 $"Performing user '{request.PerformedByUserId}' was not found.");
+        }
+
+        var canReject = fine.CurrentAction switch
+        {
+            FineActionType.Created => performingUser.IsInRole(
+                UserRole.Manager,
+                UserRole.Admin),
+            FineActionType.ManagerApproved => performingUser.IsInRole(
+                UserRole.Finance,
+                UserRole.Admin),
+            _ => false
+        };
+
+        if (!canReject)
+        {
+            throw new UnauthorizedAccessException(
+                "The current user cannot reject the fine at its current approval stage.");
         }
 
         fine.Reject(performedByUserId, request.RejectionReason);

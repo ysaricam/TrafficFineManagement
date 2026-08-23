@@ -1,6 +1,6 @@
 using TrafficFineManagement.Modules.TrafficFine.Application.Fines.GetAllFines;
 using TrafficFineManagement.Modules.TrafficFine.Domain.Fines;
-using TrafficFineManagement.Modules.Vehicles.Application.Users.GetAllUsers;
+using TrafficFineManagement.Modules.Users.Application.Users.GetAllUsers;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.GetAllVehicles;
 
 namespace TrafficFineManagement.API.Models.TrafficFines;

@@ -4,11 +4,7 @@ namespace TrafficFineManagement.API.Models.TrafficFines;
 
 public sealed class CreateFineInputModel
 {
-    [Required]
-    public Guid FinedUserId { get; init; }
-
-    [Required]
-    public Guid VehicleId { get; init; }
+    public Guid? VehicleId { get; init; }
 
     [Range(0.01, double.MaxValue)]
     public decimal Amount { get; init; }
@@ -25,6 +21,6 @@ public sealed class CreateFineInputModel
     [Required]
     public DateTime FineDate { get; init; }
 
-    [Required]
-    public Guid CreatedByUserId { get; init; }
+    [Range(-840, 840)]
+    public int? TimeZoneOffsetMinutes { get; init; }
 }

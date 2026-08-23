@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TrafficFineManagement.Vehicles.Application\TrafficFineManagement.Vehicles.Application.csproj" />
     <ProjectReference Include="..\TrafficFineManagement.Vehicles.Domain\TrafficFineManagement.Vehicles.Domain.csproj" />
+    <ProjectReference Include="..\..\Users\TrafficFineManagement.Users.IntegrationEvents\TrafficFineManagement.Users.IntegrationEvents.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\TrafficFineManagement.Infrastructure\TrafficFineManagement.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using TrafficFineManagement.BuildingBlocks.Infrastructure.EventBus;
 using TrafficFineManagement.Modules.Vehicles.IntegrationEvents;
+using TrafficFineManagement.Modules.Users.IntegrationEvents;
 
 namespace TrafficFineManagement.Modules.TrafficFine.Infrastructure.IntegrationEvents;
 

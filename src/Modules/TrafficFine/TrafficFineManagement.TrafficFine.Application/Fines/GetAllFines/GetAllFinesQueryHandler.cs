@@ -31,8 +31,14 @@ public sealed class GetAllFinesQueryHandler :
                 "FineDate",
                 "Status",
                 "CurrentAction"
-            FROM traffic_fines."FineReadModel"
-            ORDER BY "FineDate" DESC, "Id"
+            FROM traffic_fines."FineReadModel" AS fine
+            ORDER BY
+                (
+                    SELECT MAX(history."ActionDate")
+                    FROM traffic_fines."FineApprovalHistories" AS history
+                    WHERE history."FineId" = fine."Id"
+                ) DESC NULLS LAST,
+                fine."Id"
             """;
 
         var fines = await connection.QueryAsync<FineDto>(

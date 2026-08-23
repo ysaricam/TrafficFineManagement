@@ -1,7 +1,6 @@
 using Autofac;
 using TrafficFineManagement.API.Modules;
 using TrafficFineManagement.BuildingBlocks.Infrastructure.DomainEventsDispatching;
-using TrafficFineManagement.Modules.Vehicles.Application.Users.Notifications;
 using TrafficFineManagement.Modules.Vehicles.Application.Vehicles.Notifications;
 
 namespace TrafficFineManagement.API.Modules.Vehicles;
@@ -16,9 +15,6 @@ public static class VehiclesStartup
 
         var domainNotificationsMap = new BiDictionary<string, Type>();
 
-        domainNotificationsMap.Add(
-            nameof(UserCreatedNotification),
-            typeof(UserCreatedNotification));
         domainNotificationsMap.Add(
             nameof(VehicleCreatedNotification),
             typeof(VehicleCreatedNotification));

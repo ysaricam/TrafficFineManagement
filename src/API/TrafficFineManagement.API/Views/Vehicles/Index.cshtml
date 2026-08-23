@@ -1,6 +1,10 @@
 @model VehicleListViewModel
 @{
     ViewData["Title"] = "Araçlar";
+    var vehicleUserLabelsJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.Users.ToDictionary(
+            user => user.Id.ToString(),
+            user => $"{user.Name} {user.Surname} (@{user.Username})"));
 }
 
 <section class="hero">
@@ -59,11 +63,14 @@
         </div>
         <div class="panel-actions">
             <span class="record-count">@Model.TotalCount kayıt</span>
-            <button class="button button-primary button-small"
-                    type="button"
-                    data-dialog-open="create-vehicle-dialog">
-                + Yeni araç
-            </button>
+            @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+            {
+                <button class="button button-primary button-small"
+                        type="button"
+                        data-dialog-open="create-vehicle-dialog">
+                    + Yeni araç
+                </button>
+            }
         </div>
     </div>
 
@@ -103,19 +110,24 @@
                                     @if (vehicle.Status)
                                     {
                                         <span class="status status-active"><i></i>Kullanımda</span>
+                                        @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                                        {
                                         <button class="status-command status-command-complete"
                                                 type="button"
                                                 data-dialog-open="complete-usage-dialog"
                                                 data-vehicle-id="@vehicle.Id"
                                                 data-user-id="@vehicle.ActiveUserId"
                                                 data-vehicle-label="@vehicle.Plaka · @vehicle.Brand @vehicle.Model"
-                                                data-user-label="@vehicle.ActiveUserId">
+                                                data-user-label="@Model.GetUserLabel(vehicle.ActiveUserId)">
                                             Kullanımı tamamla
                                         </button>
+                                        }
                                     }
                                     else
                                     {
                                         <span class="status status-available"><i></i>Müsait</span>
+                                        @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                                        {
                                         <button class="status-command status-command-assign"
                                                 type="button"
                                                 data-dialog-open="assign-user-dialog"
@@ -123,13 +135,18 @@
                                                 data-vehicle-label="@vehicle.Plaka · @vehicle.Brand @vehicle.Model">
                                             Kullanıcı ata
                                         </button>
+                                        }
                                     }
                                 </div>
                             </td>
                             <td class="action-column">
-                                <a class="detail-link" href="/api/vehicles/@vehicle.Id" aria-label="@vehicle.Plaka API detayını aç">
-                                    API detayı <span aria-hidden="true">↗</span>
-                                </a>
+                                <button class="detail-link detail-button"
+                                        type="button"
+                                        data-vehicle-history
+                                        data-vehicle-id="@vehicle.Id"
+                                        data-vehicle-label="@vehicle.Plaka · @vehicle.Brand @vehicle.Model">
+                                    Araç geçmişi <span aria-hidden="true">↗</span>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -166,6 +183,7 @@
                 <button class="button button-primary" type="submit">Aracı oluştur</button>
             </div>
         </form>
+
     </div>
 </dialog>
 
@@ -182,35 +200,59 @@
                 <span>Kullanıcı</span>
                 <select name="UserId" required>
                     <option value="">Kullanıcı seçin</option>
-                    @foreach (var user in Model.Users)
+                    @foreach (var user in Model.Drivers)
                     {
-                        <option value="@user.Id">@user.Id</option>
+                        <option value="@user.Id">@user.Name @user.Surname (@user.Username)</option>
                     }
                 </select>
             </label>
             <label>
-                <span>Başlangıç zamanı <small>UTC</small></span>
-                <input name="StartTime"
-                       type="datetime-local"
-                       max="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")"
-                       value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" />
+                <span>Başlangıç zamanı</span>
+                <input id="usage-start-time" name="StartTime" type="datetime-local" />
             </label>
+            <input id="usage-timezone-offset" name="TimeZoneOffsetMinutes" type="hidden" />
             <div class="dialog-actions">
                 <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
-                <button class="button button-primary" type="submit" disabled="@(Model.Users.Count == 0)">
+                <button class="button button-primary" type="submit" disabled="@(Model.Drivers.Count == 0)">
                     Kullanıcıyı ata
                 </button>
             </div>
         </form>
 
+        @if (User.IsInRole("Admin"))
+        {
         <div class="dialog-divider"><span>veya</span></div>
         <form asp-action="CreateUser" method="post" class="inline-user-create">
-            <div>
-                <strong>Yeni kullanıcı gerekiyor mu?</strong>
-                <span>Sistem otomatik bir kullanıcı kimliği üretir.</span>
-            </div>
+            <label>
+                <span>İsim</span>
+                <input name="Name" autocomplete="given-name" required maxlength="100" />
+            </label>
+            <label>
+                <span>Soyisim</span>
+                <input name="Surname" autocomplete="family-name" required maxlength="100" />
+            </label>
+            <label>
+                <span>Kullanıcı adı</span>
+                <input name="Username" autocomplete="username" required minlength="3" maxlength="50" />
+            </label>
+            <label>
+                <span>Parola</span>
+                <input name="Password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" />
+            </label>
+            <label>
+                <span>Rol</span>
+                <select name="Role" required>
+                    <option value="0">Şoför</option>
+                    <option value="1">Yönetici</option>
+                    <option value="2">Finansçı</option>
+                    <option value="3">Admin</option>
+                    <option value="4">Ceza Görevlisi</option>
+                </select>
+            </label>
             <button class="button button-secondary button-small" type="submit">+ Kullanıcı oluştur</button>
         </form>
+        }
+
     </div>
 </dialog>
 
@@ -237,7 +279,29 @@
     </div>
 </dialog>
 
+<dialog class="command-dialog history-dialog" id="vehicle-history-dialog" aria-labelledby="vehicle-history-title">
+    <div class="dialog-card">
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Pencereyi kapat">×</button>
+        <p class="eyebrow">Kullanım geçmişi</p>
+        <h2 id="vehicle-history-title">Araç geçmişi</h2>
+        <p class="dialog-copy selected-vehicle-label" id="vehicle-history-label"></p>
+        <div id="vehicle-history-content" class="history-list" aria-live="polite"></div>
+    </div>
+</dialog>
+
 <script>
+    const vehicleUserLabels = @Html.Raw(vehicleUserLabelsJson);
+
+    const usageStartTime = document.getElementById('usage-start-time');
+    const usageTimezoneOffset = document.getElementById('usage-timezone-offset');
+    if (usageStartTime && usageTimezoneOffset) {
+        const now = new Date();
+        const localNow = toLocalDateTimeValue(now);
+        usageStartTime.value = localNow;
+        usageStartTime.max = localNow;
+        usageTimezoneOffset.value = now.getTimezoneOffset();
+    }
+
     document.querySelectorAll('[data-dialog-open]').forEach(button => {
         button.addEventListener('click', () => {
             const dialog = document.getElementById(button.dataset.dialogOpen);
@@ -258,6 +322,45 @@
         });
     });
 
+    document.querySelectorAll('[data-vehicle-history]').forEach(button => {
+        button.addEventListener('click', async () => {
+            const dialog = document.getElementById('vehicle-history-dialog');
+            const content = document.getElementById('vehicle-history-content');
+            document.getElementById('vehicle-history-label').textContent = button.dataset.vehicleLabel;
+            content.innerHTML = '<p class="history-loading">Araç geçmişi yükleniyor…</p>';
+            dialog.showModal();
+
+            try {
+                const response = await fetch(`/api/vehicles/${button.dataset.vehicleId}`);
+                if (!response.ok) throw new Error('Araç geçmişi alınamadı.');
+
+                const vehicle = await response.json();
+                const usages = [...(vehicle.users ?? [])].reverse();
+
+                content.innerHTML = usages.length
+                    ? usages.map(usage => {
+                        const userLabel = vehicleUserLabels[usage.userId] ?? usage.userId;
+                        const endLabel = usage.endTime
+                            ? `Bitiş · ${formatDate(usage.endTime)}`
+                            : 'Aktif kullanım';
+
+                        return `
+                            <article class="history-item">
+                                <span class="history-dot"></span>
+                                <div>
+                                    <strong>${escapeHtml(userLabel)}</strong>
+                                    <span>Başlangıç · ${formatDate(usage.startTime)}</span>
+                                    <small>${endLabel}</small>
+                                </div>
+                            </article>`;
+                    }).join('')
+                    : '<p class="history-loading">Bu araç için henüz kullanım kaydı bulunmuyor.</p>';
+            } catch (error) {
+                content.innerHTML = `<p class="history-error">${escapeHtml(error.message)}</p>`;
+            }
+        });
+    });
+
     document.querySelectorAll('[data-dialog-close]').forEach(button => {
         button.addEventListener('click', () => button.closest('dialog').close());
     });
@@ -269,4 +372,19 @@
             }
         });
     });
+
+    function formatDate(value) {
+        return new Date(value).toLocaleString('tr-TR');
+    }
+
+    function escapeHtml(value) {
+        const element = document.createElement('div');
+        element.textContent = value;
+        return element.innerHTML;
+    }
+
+    function toLocalDateTimeValue(date) {
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+        return localDate.toISOString().slice(0, 16);
+    }
 </script>

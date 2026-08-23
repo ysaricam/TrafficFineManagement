@@ -1,6 +1,10 @@
 @model FineListViewModel
 @{
     ViewData["Title"] = "Trafik Cezaları";
+    var fineUserLabelsJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.Users.ToDictionary(
+            user => user.Id.ToString(),
+            user => $"{user.Name} {user.Surname} (@{user.Username})"));
 }
 
 <section class="hero">
@@ -57,8 +61,11 @@
         </div>
         <div class="panel-actions">
             <span class="record-count">@Model.TotalCount kayıt</span>
-            <button class="button button-primary button-small" type="button"
-                    data-dialog-open="create-fine-dialog">+ Yeni ceza</button>
+            @if (User.IsInRole("Driver") || User.IsInRole("FineOfficer") || User.IsInRole("Admin"))
+            {
+                <button class="button button-primary button-small" type="button"
+                        data-dialog-open="create-fine-dialog">+ Yeni ceza</button>
+            }
         </div>
     </div>
 
@@ -108,30 +115,36 @@
                                 @if (fine.Status == FineStatus.Active)
                                 {
                                     <div class="fine-inline-actions">
-                                        @if (fine.CurrentAction == FineActionType.Created)
+                                        @if (fine.CurrentAction == FineActionType.Created &&
+                                            (User.IsInRole("Manager") || User.IsInRole("Admin")))
                                         {
                                             <button type="button" class="status-command status-command-assign"
                                                     data-fine-action="manager-approve"
                                                     data-fine-id="@fine.Id" data-fine-label="@fineLabel"
                                                     data-action-title="Yönetici onayı">Yönetici onayı</button>
+                                            <button type="button" class="status-command status-command-reject"
+                                                    data-reject-fine data-fine-id="@fine.Id"
+                                                    data-fine-label="@fineLabel">Reddet</button>
                                         }
-                                        else if (fine.CurrentAction == FineActionType.ManagerApproved)
+                                        else if (fine.CurrentAction == FineActionType.ManagerApproved &&
+                                            (User.IsInRole("Finance") || User.IsInRole("Admin")))
                                         {
                                             <button type="button" class="status-command status-command-assign"
                                                     data-fine-action="finance-approve"
                                                     data-fine-id="@fine.Id" data-fine-label="@fineLabel"
                                                     data-action-title="Finans onayı">Finans onayı</button>
+                                            <button type="button" class="status-command status-command-reject"
+                                                    data-reject-fine data-fine-id="@fine.Id"
+                                                    data-fine-label="@fineLabel">Reddet</button>
                                         }
-                                        else if (fine.CurrentAction == FineActionType.FinanceApproved)
+                                        else if (fine.CurrentAction == FineActionType.FinanceApproved &&
+                                            (User.IsInRole("FineOfficer") || User.IsInRole("Admin")))
                                         {
                                             <button type="button" class="status-command status-command-complete"
                                                     data-fine-action="complete"
                                                     data-fine-id="@fine.Id" data-fine-label="@fineLabel"
                                                     data-action-title="Süreci tamamla">Tamamla</button>
                                         }
-                                        <button type="button" class="status-command status-command-reject"
-                                                data-reject-fine data-fine-id="@fine.Id"
-                                                data-fine-label="@fineLabel">Reddet</button>
                                     </div>
                                 }
                             </div>
@@ -154,47 +167,34 @@
         <button class="dialog-close" type="button" data-dialog-close aria-label="Pencereyi kapat">×</button>
         <p class="eyebrow">Fine command</p>
         <h2 id="create-fine-title">Yeni ceza oluştur</h2>
-        <p class="dialog-copy">Araç, ceza yiyen kullanıcı ve işlemi yapan kullanıcı birlikte kaydedilir.</p>
+        @if (User.IsInRole("FineOfficer") || User.IsInRole("Admin"))
+        {
+            <p class="dialog-copy">Araç plakasını ve ceza tarihini seçin; o sıradaki sürücü kullanım geçmişinden otomatik belirlenir.</p>
+        }
+        else
+        {
+            <p class="dialog-copy">Ceza tarihindeki aracınız kullanım geçmişinizden otomatik belirlenir.</p>
+        }
 
         <form asp-action="Create" method="post" class="command-form">
+            @if (User.IsInRole("FineOfficer") || User.IsInRole("Admin"))
+            {
             <label>
-                <span>Araç</span>
-                <select id="fine-vehicle-select" name="VehicleId" required>
-                    <option value="">Araç seçin</option>
+                <span>Araç plakası</span>
+                <select name="VehicleId" required>
+                    <option value="">Plaka seçin</option>
                     @foreach (var vehicle in Model.Vehicles)
                     {
-                        <option value="@vehicle.Id" data-active-user-id="@vehicle.ActiveUserId">
-                            @vehicle.Plaka · @vehicle.Brand @vehicle.Model
-                        </option>
+                        <option value="@vehicle.Id">@vehicle.Plaka</option>
                     }
                 </select>
             </label>
-            <div class="field-row">
-                <label>
-                    <span>Ceza yiyen kullanıcı</span>
-                    <select id="fined-user-select" name="FinedUserId" required>
-                        <option value="">Kullanıcı seçin</option>
-                        @foreach (var user in Model.Users)
-                        {
-                            <option value="@user.Id">@user.Id</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    <span>İşlemi yapan kullanıcı</span>
-                    <select name="CreatedByUserId" required>
-                        <option value="">Kullanıcı seçin</option>
-                        @foreach (var user in Model.Users)
-                        {
-                            <option value="@user.Id">@user.Id</option>
-                        }
-                    </select>
-                </label>
-            </div>
+            }
             <div class="field-row">
                 <label><span>İhlal kodu</span><input name="ViolationCode" maxlength="50" required placeholder="HIZ-001" /></label>
-                <label><span>Ceza tarihi <small>UTC</small></span><input name="FineDate" type="datetime-local" value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" required /></label>
+                <label><span>Ceza tarihi</span><input id="fine-date-input" name="FineDate" type="datetime-local" required /></label>
             </div>
+            <input id="fine-timezone-offset" name="TimeZoneOffsetMinutes" type="hidden" />
             <label><span>Ceza nedeni</span><textarea name="Reason" maxlength="1000" required placeholder="İhlalin kısa açıklaması"></textarea></label>
             <div class="field-row amount-fields">
                 <label><span>Tutar</span><input name="Amount" type="number" min="0.01" step="0.01" required placeholder="1500,00" /></label>
@@ -202,7 +202,8 @@
             </div>
             <div class="dialog-actions">
                 <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
-                <button class="button button-primary" type="submit" disabled="@(Model.Users.Count == 0 || Model.Vehicles.Count == 0)">Cezayı oluştur</button>
+                <button class="button button-primary" type="submit"
+                        disabled="@((User.IsInRole("FineOfficer") || User.IsInRole("Admin")) && Model.Vehicles.Count == 0)">Cezayı oluştur</button>
             </div>
         </form>
     </div>
@@ -217,13 +218,6 @@
         <form id="fine-action-form" method="post" class="command-form">
             @Html.AntiForgeryToken()
             <input id="fine-action-id" type="hidden" name="FineId" />
-            <label>
-                <span>İşlemi yapan kullanıcı</span>
-                <select name="PerformedByUserId" required>
-                    <option value="">Kullanıcı seçin</option>
-                    @foreach (var user in Model.Users) { <option value="@user.Id">@user.Id</option> }
-                </select>
-            </label>
             <label><span>Açıklama</span><textarea name="Description" maxlength="1000" placeholder="İsteğe bağlı açıklama"></textarea></label>
             <div class="dialog-actions">
                 <button class="button button-secondary" type="button" data-dialog-close>Vazgeç</button>
@@ -241,13 +235,6 @@
         <p class="dialog-copy selected-vehicle-label" id="reject-fine-label"></p>
         <form asp-action="Reject" method="post" class="command-form">
             <input id="reject-fine-id" type="hidden" name="FineId" />
-            <label>
-                <span>İşlemi yapan kullanıcı</span>
-                <select name="PerformedByUserId" required>
-                    <option value="">Kullanıcı seçin</option>
-                    @foreach (var user in Model.Users) { <option value="@user.Id">@user.Id</option> }
-                </select>
-            </label>
             <label><span>Ret nedeni</span><textarea name="RejectionReason" maxlength="1000" required placeholder="Ret nedenini açıklayın"></textarea></label>
             <p class="dialog-warning">Bu işlem cezayı pasif duruma getirir ve geri alınamaz.</p>
             <div class="dialog-actions">
@@ -276,6 +263,15 @@
     };
     const actionLabels = ['Oluşturuldu', 'Yönetici onayladı', 'Finans onayladı', 'Reddedildi', 'Tamamlandı'];
     const statusLabels = ['Aktif', 'Pasif'];
+    const fineUserLabels = @Html.Raw(fineUserLabelsJson);
+
+    const fineDateInput = document.getElementById('fine-date-input');
+    const fineTimezoneOffset = document.getElementById('fine-timezone-offset');
+    if (fineDateInput && fineTimezoneOffset) {
+        const now = new Date();
+        fineDateInput.value = toLocalDateTimeValue(now);
+        fineTimezoneOffset.value = now.getTimezoneOffset();
+    }
 
     document.querySelectorAll('[data-dialog-open]').forEach(button => {
         button.addEventListener('click', () => document.getElementById(button.dataset.dialogOpen).showModal());
@@ -311,26 +307,25 @@
                 const response = await fetch(`/api/traffic-fines/${button.dataset.fineId}`);
                 if (!response.ok) throw new Error('Geçmiş alınamadı.');
                 const fine = await response.json();
-                content.innerHTML = fine.approvalHistory.map(item => `
+                content.innerHTML = fine.approvalHistory.map(item => {
+                    const userLabel = fineUserLabels[item.performedByUserId] ?? item.performedByUserId;
+
+                    return `
                     <article class="history-item">
                         <span class="history-dot"></span>
                         <div>
                             <strong>${actionLabels[item.actionType] ?? item.actionType}</strong>
+                            <span>${escapeHtml(userLabel)}</span>
                             <span>${new Date(item.actionDate).toLocaleString('tr-TR')}</span>
-                            <code>${item.performedByUserId}</code>
                             ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
-                            <small>${statusLabels[item.previousStatus]} → ${statusLabels[item.newStatus]}</small>
+                            <small>${statusLabels[item.newStatus] ?? item.newStatus}</small>
                         </div>
-                    </article>`).join('') || '<p class="history-loading">Geçmiş kaydı bulunamadı.</p>';
+                    </article>`;
+                }).join('') || '<p class="history-loading">Geçmiş kaydı bulunamadı.</p>';
             } catch (error) {
                 content.innerHTML = `<p class="history-error">${escapeHtml(error.message)}</p>`;
             }
         });
-    });
-
-    document.getElementById('fine-vehicle-select')?.addEventListener('change', event => {
-        const activeUserId = event.target.selectedOptions[0]?.dataset.activeUserId;
-        if (activeUserId) document.getElementById('fined-user-select').value = activeUserId;
     });
 
     document.querySelectorAll('[data-dialog-close]').forEach(button => {
@@ -344,5 +339,10 @@
         const element = document.createElement('div');
         element.textContent = value;
         return element.innerHTML;
+    }
+
+    function toLocalDateTimeValue(date) {
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+        return localDate.toISOString().slice(0, 16);
     }
 </script>

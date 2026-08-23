@@ -32,9 +32,28 @@ public sealed class CreateFineCommandHandler : ICommandHandler<CreateFineCommand
             throw new KeyNotFoundException($"Fined user '{request.FinedUserId}' was not found.");
         }
 
-        if (await _userRepository.GetByIdAsync(createdByUserId, cancellationToken) is null)
+        var creatingUser = await _userRepository.GetByIdAsync(
+            createdByUserId,
+            cancellationToken);
+        if (creatingUser is null)
         {
             throw new KeyNotFoundException($"Creating user '{request.CreatedByUserId}' was not found.");
+        }
+
+        if (!creatingUser.IsInRole(
+                UserRole.Driver,
+                UserRole.FineOfficer,
+                UserRole.Admin))
+        {
+            throw new UnauthorizedAccessException(
+                "Only a driver, fine officer, or administrator can create a fine.");
+        }
+
+        if (creatingUser.Role == UserRole.Driver &&
+            createdByUserId != finedUserId)
+        {
+            throw new UnauthorizedAccessException(
+                "A driver can only create a fine for themselves.");
         }
 
         if (await _vehicleRepository.GetByIdAsync(vehicleId, cancellationToken) is null)

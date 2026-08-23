@@ -12,5 +12,8 @@ internal sealed class UserEntityTypeConfiguration : IEntityTypeConfiguration<Use
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id);
+        builder.Property(x => x.Role)
+            .HasField("_role")
+            .HasColumnName("Role");
     }
 }

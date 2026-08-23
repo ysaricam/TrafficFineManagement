@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TrafficFineManagement.BuildingBlocks.Infrastructure.EventBus;
 using TrafficFineManagement.Modules.TrafficFine.Application.Contracts;
 using TrafficFineManagement.Modules.TrafficFine.Domain.Users;
-using TrafficFineManagement.Modules.Vehicles.IntegrationEvents;
+using TrafficFineManagement.Modules.Users.IntegrationEvents;
 
 namespace TrafficFineManagement.Modules.TrafficFine.Infrastructure.IntegrationEvents;
 
@@ -30,7 +30,9 @@ public sealed class UserCreatedIntegrationEventHandler :
             return;
         }
 
-        await repository.AddAsync(User.Create(integrationEvent.UserId), cancellationToken);
+        await repository.AddAsync(
+            User.Create(integrationEvent.UserId, (UserRole)integrationEvent.Role),
+            cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
     }
 }

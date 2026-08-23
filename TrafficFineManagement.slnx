@@ -15,6 +15,12 @@
     <Project Path="src/Modules/TrafficFine/TrafficFineManagement.TrafficFine.Infrastructure/TrafficFineManagement.TrafficFine.Infrastructure.csproj" />
     <Project Path="src/Modules/TrafficFine/TrafficFineManagement.TrafficFine.IntegrationEvents/TrafficFineManagement.TrafficFine.IntegrationEvents.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Users/">
+    <Project Path="src/Modules/Users/TrafficFineManagement.Users.Application/TrafficFineManagement.Users.Application.csproj" />
+    <Project Path="src/Modules/Users/TrafficFineManagement.Users.Domain/TrafficFineManagement.Users.Domain.csproj" />
+    <Project Path="src/Modules/Users/TrafficFineManagement.Users.Infrastructure/TrafficFineManagement.Users.Infrastructure.csproj" />
+    <Project Path="src/Modules/Users/TrafficFineManagement.Users.IntegrationEvents/TrafficFineManagement.Users.IntegrationEvents.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Vehicles/">
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Application/TrafficFineManagement.Vehicles.Application.csproj" />
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.Domain/TrafficFineManagement.Vehicles.Domain.csproj" />
@@ -22,7 +28,13 @@
     <Project Path="src/Modules/Vehicles/TrafficFineManagement.Vehicles.IntegrationEvents/TrafficFineManagement.Vehicles.IntegrationEvents.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/tests/API/">
+    <Project Path="tests/API/TrafficFineManagement.API.IntegrationTests/TrafficFineManagement.API.IntegrationTests.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Users/">
+    <Project Path="tests/Modules/Users/TrafficFineManagement.Users.Domain.UnitTests/TrafficFineManagement.Users.Domain.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/Vehicles/">
     <Project Path="tests/Modules/Vehicles/TrafficFineManagement.Vehicles.Domain.UnitTests/TrafficFineManagement.Vehicles.Domain.UnitTests.csproj" />
   </Folder>
